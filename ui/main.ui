@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="search">
        <attribute name="title">
@@ -84,9 +84,9 @@
          </layout>
         </item>
         <item>
-         <widget class="QGroupBox" name="dirrect">
+         <widget class="QGroupBox" name="direct">
           <property name="title">
-           <string>Direct</string>
+           <string>Scan</string>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
@@ -97,44 +97,18 @@
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="pushButton">
+             <property name="text">
+              <string>Browse...</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="direct_scan">
              <property name="text">
               <string>Scan</string>
              </property>
             </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="chooser">
-          <property name="title">
-           <string>File shooser</string>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_6">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
-              <spacer name="horizontalSpacer">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton">
-               <property name="text">
-                <string>Scan</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
            </item>
           </layout>
          </widget>
@@ -201,12 +175,12 @@ Documents/&lt;entreprise&gt; - &lt;personne&gt; - &lt;N° client&gt;/&lt;categor
      <x>0</x>
      <y>0</y>
      <width>583</width>
-     <height>25</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuUpdate_library">
     <property name="title">
-     <string>Library</string>
+     <string>&amp;Library</string>
     </property>
     <addaction name="actionUpdate"/>
    </widget>
@@ -215,7 +189,7 @@ Documents/&lt;entreprise&gt; - &lt;personne&gt; - &lt;N° client&gt;/&lt;categor
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionUpdate">
    <property name="text">
-    <string>Update</string>
+    <string>&amp;Update</string>
    </property>
   </action>
  </widget>
