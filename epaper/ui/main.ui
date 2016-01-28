@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="search">
        <attribute name="title">
@@ -90,24 +90,21 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
-            <widget class="QPlainTextEdit" name="scan_to">
+            <widget class="QTextEdit" name="scan_to">
              <property name="inputMethodHints">
               <set>Qt::ImhNone</set>
-             </property>
-             <property name="sizeAdjustPolicy">
-              <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="browse">
+            <widget class="QPushButton" name="pushButton">
              <property name="text">
               <string>Browse...</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="scan_btn">
+            <widget class="QPushButton" name="direct_scan">
              <property name="text">
               <string>Scan</string>
              </property>
@@ -123,7 +120,7 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
-            <widget class="QPlainTextEdit" name="scan_comments">
+            <widget class="QPlainTextEdit" name="plainTextEdit_2">
              <property name="plainText">
               <string>Format conseiller:
 Documents/&lt;entreprise&gt; - &lt;personne&gt; - &lt;N° client&gt;/&lt;categorie&gt;/&lt;nom&gt; - &lt;data&gt; - &lt;N° page&gt;</string>
