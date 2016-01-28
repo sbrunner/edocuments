@@ -1,4 +1,4 @@
-# Epaper a simple and productive personal documents library
+# EPaper a simple and productive personal documents library
 
 * Scan your documents
   * Auto rotate
