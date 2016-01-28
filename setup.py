@@ -19,8 +19,6 @@ README = """A sample and productive personal documents library
 `Sources <https://github.com/sbrunner/personal-documents-library/>`_"""
 
 install_requires = [
-    "PyQt5",
-    "Pillow"
 ]
 
 setup_requires = [
@@ -31,7 +29,7 @@ tests_require = install_requires + [
 
 setup(
     name="epaper",
-    version="1.0",
+    version="1.0.0",
     description="A simple and productive personal documents library",
     long_description=README,
     classifiers=[

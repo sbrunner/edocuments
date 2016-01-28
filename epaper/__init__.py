@@ -1,18 +1,22 @@
 
-from .ui.main import Ui_MainWindow
-from PyQt5 import QMainWindow
+import sys
+from ui.main import Ui_MainWindow
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QMainWindow
 
 
 class MainWindows(QMainWindow):
     def __init__(self):
-        QMainWindow.__init__(self)
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
+        super().__init__()
+        ui = Ui_MainWindow()
+        ui.setupUi(self)
 
 
 def main():
+    app = QApplication(sys.argv)
     mw = MainWindows()
     mw.show()
+    app.exec()
 
 
 if __name__ == "__main__":
