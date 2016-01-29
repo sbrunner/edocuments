@@ -22,7 +22,7 @@ def process(names, filename=None, destination_filename=None, in_extention=None):
             cmd = dict(cmd=cmd)
 
         if cmd.get('type') == 'rename':
-            destination_filename = rename(cmd, destination_filename)
+            destination_filename = _rename(cmd, destination_filename)
         else:
             if 'out_ext' in cmd:
                 out_ext = cmd['out_ext']
@@ -65,7 +65,7 @@ def process(names, filename=None, destination_filename=None, in_extention=None):
             copyfile(filename, destination_filename)
             unlink(filename)
 
-def rename(cmd, destination_filename)
+def _rename(cmd, destination_filename):
     from_re = cmd.get('from')
     to_re = cmd.get('to')
     if cmd.get('format') in ['upper', 'lower']:
@@ -82,7 +82,6 @@ def destination_filename(names, destination_filename=None, in_extention=None):
     cmds = edocuments.config.get("cmds", {})
     out_ext = in_extention
 
-    original_filename = filename
     if destination_filename is None:
         destination_filename = filename
     for name in names:
@@ -94,14 +93,14 @@ def destination_filename(names, destination_filename=None, in_extention=None):
             cmd = {}
 
         if cmd.get('type') == 'rename':
-            destination_filename = rename(cmd, destination_filename)
+            destination_filename = _rename(cmd, destination_filename)
         else:
             if 'out_ext' in cmd:
                 out_ext = cmd['out_ext']
 
-    if original_filename != filename:
-        if out_ext is not None:
-            destination_filename = "%s.%s" % (re.sub(
-                r"\.[a-z0-9A-Z]{2,5}$", "",
-                destination_filename
-            ), out_ext)
+    if out_ext is not None:
+        destination_filename = "%s.%s" % (re.sub(
+            r"\.[a-z0-9A-Z]{2,5}$", "",
+            destination_filename
+        ), out_ext)
+    return destination_filename

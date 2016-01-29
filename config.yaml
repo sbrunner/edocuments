@@ -40,6 +40,8 @@ to_txt:
     cmds:
     - ocr
 
+open_cmd: gnome-open
+
 postprocess:
 - optipng
 

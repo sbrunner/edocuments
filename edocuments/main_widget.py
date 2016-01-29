@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import re
-from PyQt5.QtWidgets import QMainWindow, QFileDialog
+import pathlib
+from subprocess import call
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QErrorMessage, QMessageBox
 import edocuments
-from edocuments.process import process
+from edocuments.process import process, destination_filename
 from edocuments.ui.main import Ui_MainWindow
 
 
@@ -39,8 +41,29 @@ class MainWindow(QMainWindow):
         filename = self.ui.scan_to.text()
         if filename[0] != '/':
             filename = edocuments.root_folder + filename
-        # TODO: verify destination file
-        process(
+
+        destination = destination_filename(
             self.ui.scan_type.currentData().get("cmds"),
             destination_filename=filename
         )
+
+        path = pathlib.Path(destination)
+        if path.is_dir():
+            QErrorMessage.showMessage("The destination is a directory!")
+            return
+
+        if path.is_file():
+            msg = QMessageBox()
+            msg.setText("The destination file already exists")
+            msg.setInformativeText("Do you want to overwrite it?")
+            msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel | QMessageBox.Open)
+            ret = msg.exec()
+            if ret == QMessageBox.Ok:
+                process(
+                    self.ui.scan_type.currentData().get("cmds"),
+                    destination_filename=filename
+                )
+            elif ret == QMessageBox.Open:
+                cmd = edocuments.config.get('open_cmd').split(' ')
+                cmd.append(destination)
+                call(cmd)
