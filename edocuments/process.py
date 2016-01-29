@@ -6,14 +6,16 @@ from shutil import copyfile
 import edocuments
 
 
-def process(names, filename=None, destination_filename=None, in_extention=None):
+def process(
+        names, filename=None, destination_filename=None,
+        in_extention=None, progress=None, progress_text=""):
     cmds = edocuments.config.get("cmds", {})
     out_ext = in_extention
 
     original_filename = filename
     if destination_filename is None:
         destination_filename = filename
-    for name in names:
+    for no, name in enumerate(names):
         cmd = cmds.get(name)
         if cmd is None:
             raise "Missing command '%s' in `cmds`" % name
@@ -48,8 +50,14 @@ def process(names, filename=None, destination_filename=None, in_extention=None):
 
             cmd_cmd = cmd_cmd.format(**params)
 
-            print("%s: %s" % (name, cmd_cmd))
+            print("{name}: {cmd}".format(name=name, cmd=cmd_cmd))
+            if progress is not None:
+                progress.setLabelText(progress_text.format(name=name, **cmd))
+                if progress.wasCanceled():
+                    return
             check_call(cmd_cmd, shell=True)
+            if progress is not None:
+                progress.setValue(no + 1)
 
             filename = out_name
 
@@ -65,6 +73,7 @@ def process(names, filename=None, destination_filename=None, in_extention=None):
             copyfile(filename, destination_filename)
             unlink(filename)
 
+
 def _rename(cmd, destination_filename):
     from_re = cmd.get('from')
     to_re = cmd.get('to')
@@ -78,12 +87,10 @@ def _rename(cmd, destination_filename):
     return re.sub(from_re, to_re, destination_filename)
 
 
-def destination_filename(names, destination_filename=None, in_extention=None):
+def destination_filename(names, destination_filename, in_extention=None):
     cmds = edocuments.config.get("cmds", {})
     out_ext = in_extention
 
-    if destination_filename is None:
-        destination_filename = filename
     for name in names:
         cmd = cmds.get(name)
         if cmd is None:

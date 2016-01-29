@@ -2,8 +2,11 @@
 
 import re
 import pathlib
+from threading import Thread
 from subprocess import call
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QErrorMessage, QMessageBox
+from PyQt5.Qt import Qt
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, \
+    QErrorMessage, QMessageBox, QProgressDialog
 import edocuments
 from edocuments.process import process, destination_filename
 from edocuments.ui.main import Ui_MainWindow
@@ -38,13 +41,13 @@ class MainWindow(QMainWindow):
         self.ui.scan_to.setText(filename)
 
     def scan_start(self, event):
-        filename = self.ui.scan_to.text()
-        if filename[0] != '/':
-            filename = edocuments.root_folder + filename
+        self.filename = self.ui.scan_to.text()
+        if self.filename[0] != '/':
+            self.filename = edocuments.root_folder + self.filename
 
         destination = destination_filename(
             self.ui.scan_type.currentData().get("cmds"),
-            destination_filename=filename
+            destination_filename=self.filename
         )
 
         path = pathlib.Path(destination)
@@ -54,16 +57,35 @@ class MainWindow(QMainWindow):
 
         if path.is_file():
             msg = QMessageBox()
+            msg.setWindowTitle("Scanning...")
             msg.setText("The destination file already exists")
             msg.setInformativeText("Do you want to overwrite it?")
             msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel | QMessageBox.Open)
             ret = msg.exec()
             if ret == QMessageBox.Ok:
-                process(
-                    self.ui.scan_type.currentData().get("cmds"),
-                    destination_filename=filename
-                )
+                self._scan()
             elif ret == QMessageBox.Open:
                 cmd = edocuments.config.get('open_cmd').split(' ')
                 cmd.append(destination)
                 call(cmd)
+        else:
+            self._scan()
+
+    def _scan(self):
+        cmds = self.ui.scan_type.currentData().get("cmds")
+
+        self.progress = QProgressDialog("Scanning...", "Cancel", 0, len(cmds), self)
+        self.progress.setWindowTitle("Scanning...")
+        self.progress.setWindowModality(Qt.WindowModal)
+        self.progress.show()
+
+        t = Thread(target=self._do_scan)
+        t.start()
+
+    def _do_scan(self):
+        cmds = self.ui.scan_type.currentData().get("cmds")
+        process(
+            cmds, destination_filename=self.filename,
+            progress=self.progress, progress_text='{display}'
+        )
+        self.progress.hide()
