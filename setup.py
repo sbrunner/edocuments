@@ -28,9 +28,9 @@ tests_require = install_requires + [
 ]
 
 setup(
-    name="epaper",
+    name="edocuments",
     version="1.0.0",
-    description="A simple and productive personal documents library",
+    description="EDocuments - a simple and productive personal documents library",
     long_description=README,
     classifiers=[
         "Programming Language :: Python :: 3",
