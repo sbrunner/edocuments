@@ -14,14 +14,17 @@
 
 On Debian you should install the following packages:
 
-```bash
-apt-get install tesseract-ocr python3-pyqt5
-```
+* `python3-pyqt5` Library
+* `sane-utils` To scan the documents
+* `graphicsmagick-imagemagick-compat` Image manipulation
+* `tesseract-ocr` The OCR used by default
+* `tesseract-ocr-fra` The OCR French language pack
+* `optipng` To optimise the generated image size
+* `pyqt5-dev-tools` To build the package
 
-for specific language (in this case French):
-
+Install all needed:
 ```bash
-apt-get install tesseract-ocr
+apt-get install python3-pyqt5 sane-utils graphicsmagick-imagemagick-compat tesseract-ocr tesseract-ocr-fra optipng
 ```
 
 to build the package:
