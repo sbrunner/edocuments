@@ -1,6 +1,6 @@
 #lang:
 
-root: "dsl"
+root_folder: "dsl"
 
 environement:
     #SANE_DEFAULT_DEVICE: hpaio:/usb/HP_LaserJet_Professional_M1132_MFP?serial=000000000QH759WZPR1a
@@ -18,37 +18,41 @@ scan_comments: |
     Nomoclature:
     Documents/<entreprise> - <personne> - <N° client>/<categorie>/<nom> - <data> - <N° page>
 
-scan:
-    Color:
-        cmds:
-        - scanc
-        - crop
-        - 2png
-        - auto-rotate
+scans:
+  - name: Color
+    cmds:
+    - scanc
+    - crop
+    - 2png
+    - auto-rotate
 
-    B&W:
-        cmds:
-        - scan
-        - crop
-        - cleanup
-        - 2png
-        - auto-rotate
+  - name: B&W
+    default: true
+    cmds:
+    - scan
+    - crop
+    - cleanup
+    - 2png
+    - auto-rotate
 
-ocr:
-- ocr
+to_txt:
+  - extention: png
+    cmds:
+    - ocr
 
 postprocess:
 - optipng
 
 task:
-    "Iptimise images":
-        on: "*.png"
-        cmds: 
-        - optipng
-    "Fix files names":
-        cmds: 
-        - fixextensions_case
-        - fixextensions_jpeg
+  - name: "Iptimise images"
+    on: "*.png"
+    cmds:
+    - optipng
+  - name: "Fix files names"
+    cmds:
+    - fixextensions_case
+    - fixextensions_jpeg
+
 cmds:
     scan:
         cmd: "scanimage --format tiff --resolution 300 --mode Gray --gamma 1 -l 0 -t 0 -x 216.069 -y 297.011 > {out}"
@@ -58,29 +62,30 @@ cmds:
         cmd: "scanimage --format tiff --resolution 300 --gamma 1 -l 0 -t 0 -x 216.069 -y 297.011i > {out}"
         out_ext: tiff
 
-    crop: "convert {in} -crop `convert scan.tiff -crop 2502x3458+25+25 +repage -level 20%,80%,4 -virtual-pixel edge -blur 0x5 -fuzz 4% -trim -format '%[fx:w+50]x%[fx:h+50]+%[fx:page.x]+%[fx:page.y]' info:` +repage -normalize {out}"
+    crop: "convert {in} -crop `convert {in} -crop 2502x3458+25+25 +repage -level 20%,80%,4 -virtual-pixel edge -blur 0x5 -fuzz 4% -trim -format '%[fx:w+50]x%[fx:h+50]+%[fx:page.x]+%[fx:page.y]' info:` +repage -normalize {out}"
 
-    cleanup: "convert {in} -background white +matte -fuzz 10% -fill white -draw 'color 2540,3500 floodfill' -level 10%,80%,1 +matte {out}"
+    #cleanup: "convert {in} -background white +matte -fuzz 10% -fill white -draw 'color 2540,3500 floodfill' -level 10%,80%,1 +matte -format tiff {out}"
+    cleanup: "convert {in} -background white +matte -fuzz 10% -fill white -level 10%,80%,1 +matte -format tiff {out}"
 
     2png:
         cmd: "convert {in} -format png {out}"
         out_ext: png
 
-    auto-rotate: "convert test.png -rotate `tesseract -psm 0 -l fra test.png text 2>&1 | grep 'Orientation in degrees' | awk '{{print $4}}'` test2.png"
+    auto-rotate: "convert {in} -rotate `tesseract -psm 0 -l fra {in} text 2>&1 | grep 'Orientation in degrees' | awk '{{print $4}}'` {out}"
 
     ocr: "tesseract -l fra {in} {out}"
 
     optipng:
-        cmd: "optipng -o7 {in}" 
+        cmd: "optipng -o7 {in}"
         inplace: true
 #        out: inplace
 
     fixextensions_case:
         type: remame
-        from: "\.([a-zA-Z]+)$"
+        from: '\.([a-zA-Z]+)$'
         format: lower
 
     fixextensions_jpeg:
         type: remame
-        from: "\.jpg$"
-        to: ".jpeg"
+        from: '\.jpg$'
+        to: '.jpeg'

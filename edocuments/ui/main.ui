@@ -94,7 +94,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBox_2"/>
+           <widget class="QComboBox" name="scan_type"/>
           </item>
          </layout>
         </item>
@@ -108,14 +108,14 @@
             <widget class="QLineEdit" name="scan_to"/>
            </item>
            <item>
-            <widget class="QPushButton" name="browse">
+            <widget class="QPushButton" name="scan_browse">
              <property name="text">
               <string>Browse...</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="direct_scan">
+            <widget class="QPushButton" name="scan_start">
              <property name="text">
               <string>Scan</string>
              </property>
@@ -127,20 +127,13 @@
         <item>
          <widget class="QGroupBox" name="groupBox">
           <property name="title">
-           <string>Commentaire</string>
+           <string>Comments</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
-            <widget class="QPlainTextEdit" name="plainTextEdit_2">
-             <property name="sizeAdjustPolicy">
-              <enum>QAbstractScrollArea::AdjustToContents</enum>
-             </property>
-             <property name="plainText">
-              <string notr="true">Format conseiller:
-Documents/&lt;entreprise&gt; - &lt;personne&gt; - &lt;N° client&gt;/&lt;categorie&gt;/&lt;nom&gt; - &lt;data&gt; - &lt;N° page&gt;</string>
-             </property>
-             <property name="textInteractionFlags">
-              <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+            <widget class="QLabel" name="scan_comments">
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>
@@ -192,7 +185,7 @@ Documents/&lt;entreprise&gt; - &lt;personne&gt; - &lt;N° client&gt;/&lt;categor
      <x>0</x>
      <y>0</y>
      <width>583</width>
-     <height>25</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuUpdate_library">

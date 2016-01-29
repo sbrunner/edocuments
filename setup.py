@@ -19,6 +19,7 @@ README = """A sample and productive personal documents library
 `Sources <https://github.com/sbrunner/personal-documents-library/>`_"""
 
 install_requires = [
+    'PyYAML',
 ]
 
 setup_requires = [
