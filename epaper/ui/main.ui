@@ -17,6 +17,9 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QTabWidget" name="tabWidget">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -31,7 +34,7 @@
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
           <item>
-           <widget class="QTextEdit" name="search_text"/>
+           <widget class="QLineEdit" name="search_text"/>
           </item>
           <item>
            <widget class="QPushButton" name="search_btn">
@@ -41,6 +44,18 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>Advance query</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_7">
+           <item>
+            <widget class="QPlainTextEdit" name="advance_query"/>
+           </item>
+          </layout>
+         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
@@ -90,14 +105,10 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
-            <widget class="QTextEdit" name="scan_to">
-             <property name="inputMethodHints">
-              <set>Qt::ImhNone</set>
-             </property>
-            </widget>
+            <widget class="QLineEdit" name="scan_to"/>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="browse">
              <property name="text">
               <string>Browse...</string>
              </property>
@@ -121,8 +132,11 @@
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
             <widget class="QPlainTextEdit" name="plainTextEdit_2">
+             <property name="sizeAdjustPolicy">
+              <enum>QAbstractScrollArea::AdjustToContents</enum>
+             </property>
              <property name="plainText">
-              <string>Format conseiller:
+              <string notr="true">Format conseiller:
 Documents/&lt;entreprise&gt; - &lt;personne&gt; - &lt;N° client&gt;/&lt;categorie&gt;/&lt;nom&gt; - &lt;data&gt; - &lt;N° page&gt;</string>
              </property>
              <property name="textInteractionFlags">
@@ -149,6 +163,9 @@ Documents/&lt;entreprise&gt; - &lt;personne&gt; - &lt;N° client&gt;/&lt;categor
        </layout>
       </widget>
       <widget class="QWidget" name="config">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <attribute name="title">
         <string>Config</string>
        </attribute>
@@ -175,7 +192,7 @@ Documents/&lt;entreprise&gt; - &lt;personne&gt; - &lt;N° client&gt;/&lt;categor
      <x>0</x>
      <y>0</y>
      <width>583</width>
-     <height>24</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuUpdate_library">
