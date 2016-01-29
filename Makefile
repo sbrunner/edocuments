@@ -1,6 +1,6 @@
 
 .PHONY: build
-build: epaper/ui/main.py
+build: edocuments/ui/main.py
 
 %.py: %.ui
 	pyuic5 -o $@ $<

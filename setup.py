@@ -48,6 +48,7 @@ setup(
     test_suite="epaper",
     entry_points={
         "console_scripts": [
+            "edocuemnts-gui = edocuments:gui_main"
         ],
     }
 )
