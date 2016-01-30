@@ -1,4 +1,4 @@
-# EDocuments
+# eDocuments
 ##### a simple and productive personal documents library
 
 * Scan your documents
