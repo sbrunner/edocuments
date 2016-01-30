@@ -34,14 +34,12 @@ def gui_main():
 
     app = QApplication(sys.argv)
     mw = MainWindow()
-    print (settings.value("geometry"))
     if settings.value("geometry") is not None:
         mw.restoreGeometry(settings.value("geometry"))
     if settings.value("state") is not None:
         mw.restoreState(settings.value("state"))
     mw.show()
     app.exec()
-    print (mw.saveGeometry())
     settings.setValue("geometry", mw.saveGeometry())
     settings.setValue("state", mw.saveState())
     settings.sync()
