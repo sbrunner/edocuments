@@ -2,6 +2,7 @@
 
 import re
 import pathlib
+from os import path
 from threading import Thread
 from subprocess import call
 from PyQt5.Qt import Qt
@@ -31,8 +32,8 @@ class MainWindow(QMainWindow):
         self.ui.scan_start.clicked.connect(self.scan_start)
 
     def scan_browse(self, event):
-        filename = QFileDialog.getOpenFileName(
-            self, directory=edocuments.root_folder
+        filename = QFileDialog.getSaveFileName(
+            self, "Scan to", directory=edocuments.root_folder
         )[0]
         filename = re.sub(r"\.[a-z0-9A-Z]{2,5}$", "", filename)
 
@@ -40,11 +41,13 @@ class MainWindow(QMainWindow):
             filename = filename[len(edocuments.root_folder):]
         self.ui.scan_to.setText(filename)
 
-    def scan_start(self, event):
-        self.filename = self.ui.scan_to.text()
-        if self.filename[0] != '/':
-            self.filename = edocuments.root_folder + self.filename
+    def filename(self):
+        filename = self.ui.scan_to.text()
+        if len(filename) == 0 or filename[0] != '/':
+            filename = path.join(edocuments.root_folder, filename)
+        return filename
 
+    def scan_start(self, event):
         destination = destination_filename(
             self.ui.scan_type.currentData().get("cmds"),
             destination_filename=self.filename
@@ -85,7 +88,7 @@ class MainWindow(QMainWindow):
     def _do_scan(self):
         cmds = self.ui.scan_type.currentData().get("cmds")
         process(
-            cmds, destination_filename=self.filename,
+            cmds, destination_filename=self.filename(),
             progress=self.progress, progress_text='{display}'
         )
         self.progress.hide()
