@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>EPaper - Simple and Productive Personal Documents Library</string>
+   <string>eDocuments - a Simple and Productive Personal Documents Library</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
