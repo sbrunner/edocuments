@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
+
+import os
 import re
-from os import unlink
 from tempfile import NamedTemporaryFile
 from subprocess import check_call
 from shutil import copyfile
@@ -38,7 +40,10 @@ def process(
                 if out_ext is None:
                     out_name = NamedTemporaryFile(mode='w+b').name
                 else:
-                    out_name = NamedTemporaryFile(mode='w+b', suffix='.' + out_ext).name
+                    out_name = NamedTemporaryFile(
+                        mode='w+b',
+                        suffix='.' + out_ext
+                    ).name
 
             params = {}
 
@@ -61,17 +66,23 @@ def process(
 
             filename = out_name
 
-    if original_filename != filename:
-        if original_filename is not None:
-            unlink(original_filename)
-        if out_ext is not None:
-            destination_filename = "%s.%s" % (re.sub(
-                r"\.[a-z0-9A-Z]{2,5}$", "",
-                destination_filename
-            ), out_ext)
-        if filename != destination_filename:
-            copyfile(filename, destination_filename)
-            unlink(filename)
+    if original_filename is not None and original_filename != filename:
+        os.unlink(original_filename)
+    if out_ext is not None:
+        destination_filename = "%s.%s" % (re.sub(
+            r"\.[a-z0-9A-Z]{2,5}$", "",
+            destination_filename
+        ), out_ext)
+    if filename != destination_filename:
+        directory = os.path.dirname(destination_filename)
+        print(directory)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        copyfile(filename, destination_filename)
+        os.unlink(filename)
+
+    return destination_filename
 
 
 def _rename(cmd, destination_filename):
@@ -87,9 +98,8 @@ def _rename(cmd, destination_filename):
     return re.sub(from_re, to_re, destination_filename)
 
 
-def destination_filename(names, destination_filename, in_extention=None):
+def destination_filename(names, filename, extention=None):
     cmds = edocuments.config.get("cmds", {})
-    out_ext = in_extention
 
     for name in names:
         cmd = cmds.get(name)
@@ -100,14 +110,14 @@ def destination_filename(names, destination_filename, in_extention=None):
             cmd = {}
 
         if cmd.get('type') == 'rename':
-            destination_filename = _rename(cmd, destination_filename)
+            filename = _rename(cmd, filename)
         else:
             if 'out_ext' in cmd:
-                out_ext = cmd['out_ext']
+                extention = cmd['out_ext']
 
-    if out_ext is not None:
-        destination_filename = "%s.%s" % (re.sub(
+    if extention is not None:
+        filename = "%s.%s" % (re.sub(
             r"\.[a-z0-9A-Z]{2,5}$", "",
-            destination_filename
-        ), out_ext)
-    return destination_filename
+            filename
+        ), extention)
+    return filename

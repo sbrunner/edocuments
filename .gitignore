@@ -1,5 +1,5 @@
 *.pyc
 *.autosave
-/epaper/ui/*.py
-!/epaper/ui/__init__.py
-/epaper.egg-info/
+/edocuments/ui/*.py
+!/edocuments/ui/__init__.py
+/edocuments.egg-info/

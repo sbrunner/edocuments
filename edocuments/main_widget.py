@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import QMainWindow, QFileDialog, \
 import edocuments
 from edocuments.process import process, destination_filename
 from edocuments.ui.main import Ui_MainWindow
+from edocuments.label_dialog import Dialog
 
 
 class MainWindow(QMainWindow):
@@ -31,6 +32,8 @@ class MainWindow(QMainWindow):
         self.ui.scan_browse.clicked.connect(self.scan_browse)
         self.ui.scan_start.clicked.connect(self.scan_start)
 
+        self.image_dialog = Dialog()
+
     def scan_browse(self, event):
         filename = QFileDialog.getSaveFileName(
             self, "Scan to", directory=edocuments.root_folder
@@ -50,7 +53,7 @@ class MainWindow(QMainWindow):
     def scan_start(self, event):
         destination = destination_filename(
             self.ui.scan_type.currentData().get("cmds"),
-            destination_filename=self.filename
+            self.filename()
         )
 
         path = pathlib.Path(destination)
@@ -87,8 +90,11 @@ class MainWindow(QMainWindow):
 
     def _do_scan(self):
         cmds = self.ui.scan_type.currentData().get("cmds")
-        process(
+        filename = process(
             cmds, destination_filename=self.filename(),
             progress=self.progress, progress_text='{display}'
         )
         self.progress.hide()
+
+        self.image_dialog.set_image(filename)
+        self.image_dialog.exec()

@@ -2,10 +2,6 @@
 
 root_folder: "dsl/Documents"
 
-environement:
-    #SANE_DEFAULT_DEVICE: hpaio:/usb/HP_LaserJet_Professional_M1132_MFP?serial=000000000QH759WZPR1a
-    SANE_DEFAULT_DEVICE: pixma:04A9173D_23E76F
-
 scan_comments: |
     Repertoires principaux:
     * 0-Importants/Identitié <personne>
