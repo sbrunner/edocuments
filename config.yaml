@@ -1,6 +1,6 @@
 #lang:
 
-root_folder: "dsl"
+root_folder: "dsl/Documents"
 
 environement:
     #SANE_DEFAULT_DEVICE: hpaio:/usb/HP_LaserJet_Professional_M1132_MFP?serial=000000000QH759WZPR1a
@@ -8,15 +8,15 @@ environement:
 
 scan_comments: |
     Repertoires principaux:
-    * Documents importants/Identitié <personne>
-    * Documents importants/Job <personne>
-    * Documents importants/Assurances/<assurance>
-    * Documents/<entreprise>/Courriers entrant
-    * Documents/<entreprise>/Courriers sortant
-    * Documents/<entreprise>/Garenties
+    * 0-Importants/Identitié <personne>
+    * 0-Importants/Job <personne>
+    * 0-Importants/Assurances/<assurance>
+    * <entreprise>/Courriers entrant
+    * <entreprise>/Courriers sortant
+    * <entreprise>/Garenties
 
     Nomoclature:
-    Documents/<entreprise> - <personne> - <N° client>/<categorie>/<nom> - <data> - <N° page>
+    <entreprise> - <personne> - <N° client>/<categorie>/<nom> - <data> - <N° page>
 
 scans:
   - name: Color
@@ -82,7 +82,8 @@ cmds:
 
     auto-rotate: 
         display: Automatic rotate.
-        cmd: "convert {in} -rotate `tesseract -psm 0 -l fra {in} text 2>&1 | grep 'Orientation in degrees' | awk '{{print $4}}' && echo 0` {out}"
+        cmd: "convert {in} -rotate `tesseract -psm 0 -l fra {in} text 2>&1 | grep 'Orientation in degrees' | awk '{{print $4}}'` {out}"
+        #cmd: "convert {in} -rotate `tesseract -psm 0 -l fra {in} text 2>&1 | grep 'Orientation in degrees' | awk '{{print $4}}' && echo 0` {out}"
 
     ocr:
         display: Reconnaissance optique des caractères.
