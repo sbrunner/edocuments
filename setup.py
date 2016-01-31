@@ -39,7 +39,7 @@ setup(
     ],
     author="Stéphane Brunner",
     author_email="stephane.brunner@gmail.com",
-    url="https://github.com/sbrunner/epaper/",
+    url="https://github.com/sbrunner/edocuments/",
     keywords="simple productive personal documents library scan index search",
     packages=find_packages(exclude=["*.tests", "*.tests.*"]),
     include_package_data=True,
@@ -47,7 +47,7 @@ setup(
     install_requires=install_requires,
     setup_requires=setup_requires,
     tests_require=tests_require,
-    test_suite="epaper",
+    test_suite="edocuments",
     entry_points={
         "console_scripts": [
             "edocuments-gui = edocuments:gui_main"
