@@ -30,13 +30,15 @@ class MainWindow(QMainWindow):
         self.ui.scan_type.setCurrentIndex(default_index)
 
         self.ui.scan_browse.clicked.connect(self.scan_browse)
+        self.ui.scan_to.returnPressed.connect(self.scan_start)
+        self.ui.scan_to.editingFinished.connect(self.scan_start)
         self.ui.scan_start.clicked.connect(self.scan_start)
 
         self.image_dialog = Dialog()
 
     def scan_browse(self, event):
         filename = QFileDialog.getSaveFileName(
-            self, "Scan to", directory=edocuments.root_folder
+            self, "Scan to", directory=self.filename()
         )[0]
         filename = re.sub(r"\.[a-z0-9A-Z]{2,5}$", "", filename)
 
