@@ -3,3 +3,5 @@
 /edocuments/ui/*.py
 !/edocuments/ui/__init__.py
 /edocuments.egg-info/
+/build/
+/dist/
