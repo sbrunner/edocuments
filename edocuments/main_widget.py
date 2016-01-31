@@ -53,18 +53,19 @@ class MainWindow(QMainWindow):
         return filename
 
     def scan_start(self, event):
+        if pathlib.Path(self.filename()).is_dir():
+            err = QErrorMessage(self)
+            err.setWindowTitle("eDocuments - Error")
+            err.showMessage("The destination is a directory!")
+            return
+
         destination = destination_filename(
             self.ui.scan_type.currentData().get("cmds"),
             self.filename()
         )
 
-        path = pathlib.Path(destination)
-        if path.is_dir():
-            QErrorMessage.showMessage("The destination is a directory!")
-            return
-
-        if path.is_file():
-            msg = QMessageBox()
+        if pathlib.Path(destination).is_file():
+            msg = QMessageBox(self)
             msg.setWindowTitle("Scanning...")
             msg.setText("The destination file already exists")
             msg.setInformativeText("Do you want to overwrite it?")
