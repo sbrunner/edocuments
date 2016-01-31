@@ -100,3 +100,9 @@ class MainWindow(QMainWindow):
 
         self.image_dialog.set_image(filename)
         self.image_dialog.exec()
+
+        self.ui.scan_to.setText(re.sub(
+            ' ([0-9]{1,3})$',
+            lambda m: ' ' + str(int(m.group(1)) + 1),
+            self.ui.scan_to.text()
+        ))
