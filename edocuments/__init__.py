@@ -3,8 +3,9 @@
 import os
 import sys
 from yaml import load
+from autoupgrade import AutoUpgrade
 from PyQt5.QtCore import QSettings
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMessageBox
 
 from edocuments.main_widget import MainWindow
 
@@ -38,6 +39,19 @@ def gui_main():
         mw.restoreGeometry(settings.value("geometry"))
     if settings.value("state") is not None:
         mw.restoreState(settings.value("state"))
+
+    au = AutoUpgrade('edocuments')
+    if au.check():
+        msg = QMessageBox(mw)
+        msg.setWindowTitle("eDocuments - Upgrade")
+        msg.setText("A new version is available")
+        msg.setInformativeText("Do you want to do anupdate and restart?")
+        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        ret = msg.exec()
+        if ret == QMessageBox.Yes:
+            au.upgrade(dependencies=True)
+            au.restart()
+
     mw.show()
     app.exec()
     settings.setValue("geometry", mw.saveGeometry())

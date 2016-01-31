@@ -20,6 +20,7 @@ README = """A sample and productive personal documents library
 
 install_requires = [
     'PyYAML',
+    'autoupgrade',
 ]
 
 setup_requires = [
@@ -30,7 +31,7 @@ tests_require = install_requires + [
 
 setup(
     name="edocuments",
-    version="1.0.0",
+    version="0.1.0",
     description="EDocuments - a simple and productive personal documents library",
     long_description=README,
     classifiers=[
@@ -49,7 +50,7 @@ setup(
     test_suite="epaper",
     entry_points={
         "console_scripts": [
-            "edocuemnts-gui = edocuments:gui_main"
+            "edocuments-gui = edocuments:gui_main"
         ],
     }
 )
