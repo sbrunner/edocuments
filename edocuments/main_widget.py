@@ -31,7 +31,6 @@ class MainWindow(QMainWindow):
 
         self.ui.scan_browse.clicked.connect(self.scan_browse)
         self.ui.scan_to.returnPressed.connect(self.scan_start)
-        self.ui.scan_to.editingFinished.connect(self.scan_start)
         self.ui.scan_start.clicked.connect(self.scan_start)
 
         self.image_dialog = Dialog()
@@ -52,7 +51,7 @@ class MainWindow(QMainWindow):
             filename = path.join(edocuments.root_folder, filename)
         return filename
 
-    def scan_start(self, event):
+    def scan_start(self, event=None):
         if pathlib.Path(self.filename()).is_dir():
             err = QErrorMessage(self)
             err.setWindowTitle("eDocuments - Error")
