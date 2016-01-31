@@ -66,10 +66,10 @@ cmds:
         display: Cropping.
         cmd: "convert {in} -crop `convert {in} -crop 2502x3458+25+25 +repage -level 20%,80%,4 -virtual-pixel edge -blur 0x5 -fuzz 4% -trim -format '%[fx:w+50]x%[fx:h+50]+%[fx:page.x]+%[fx:page.y]' info:` +repage -normalize {out}"
 
-    #cleanup: "convert {in} -background white +matte -fuzz 10% -fill white -draw 'color 2540,3500 floodfill' -level 10%,80%,1 +matte -format tiff {out}"
     cleanup:
         display: Cleanup the file.
         cmd: "convert {in} -background white +matte -fuzz 10% -fill white -level 10%,80%,1 +matte -format tiff {out}"
+        #cmd: "convert {in} -background white +matte -fuzz 10% -fill white -draw 'color 2540,3500 floodfill' -level 10%,80%,1 +matte -format tiff {out}"
 
     2png:
         display: Convert to PNG.
@@ -78,8 +78,7 @@ cmds:
 
     auto-rotate: 
         display: Automatic rotate.
-        cmd: "convert {in} -rotate `tesseract -psm 0 -l fra {in} text 2>&1 | grep 'Orientation in degrees' | awk '{{print $4}}'` {out}"
-        #cmd: "convert {in} -rotate `tesseract -psm 0 -l fra {in} text 2>&1 | grep 'Orientation in degrees' | awk '{{print $4}}' && echo 0` {out}"
+        cmd: "convert {in} -rotate `(tesseract -psm 0 -l fra {in} text 2>&1 || echo 'Orientation in degrees 0') | grep 'Orientation in degrees' | awk '{{print $4}}'` {out}"
 
     ocr:
         display: Reconnaissance optique des caractères.
@@ -89,7 +88,6 @@ cmds:
         display: Optimisation de l'image.
         cmd: "optipng -o7 {in}"
         inplace: true
-#        out: inplace
 
     fixextensions_case:
         display: Corrige la case des extentions.
