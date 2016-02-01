@@ -2,11 +2,14 @@
 ##### a simple and productive personal documents library
 
 * Scan your documents
-  * Auto rotate
-  * index them on the file name and on the content (OCR)
+  * Highly configurable throw a yaml config file, default configuration do:
+    * Auto crop
+    * Auto rotate
+    * Cleanup your scan
+  * Index them on the file name and on the content (OCR)
 
 * Mange your pdf
-  * index them on the file name and on the content
+  * Index them on the file name and on the content
 
 * Search in your library
 
@@ -27,7 +30,7 @@ Install all needed:
 apt-get install python3-pyqt5 sane-utils graphicsmagick-imagemagick-compat tesseract-ocr tesseract-ocr-fra optipng
 ```
 
-to build the package:
+To build the package:
 
 ```bash
 apt-get install pyqt5-dev-tools
