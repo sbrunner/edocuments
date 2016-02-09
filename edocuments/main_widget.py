@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
 
         self.image_dialog = Dialog()
 
-        scan_end = pyqtSignal()
+        scan_end = pyqtSignal(str)
         scan_end.connect(self.end_scan)
 
     def scan_browse(self, event):
@@ -102,9 +102,9 @@ class MainWindow(QMainWindow):
             main_window=self, status_test='{cmd}',
         )
 
-        self.scan_end.emit()
+        self.scan_end.emit(filename)
 
-    def end_scan(self):
+    def end_scan(self, filename):
         self.progress.hide()
 
         self.image_dialog.set_image(filename)
