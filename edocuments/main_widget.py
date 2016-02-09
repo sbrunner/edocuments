@@ -6,7 +6,7 @@ from os import path
 from threading import Thread
 from subprocess import call
 from PyQt5.Qt import Qt
-from PyQt4.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, \
     QErrorMessage, QMessageBox, QProgressDialog
 import edocuments

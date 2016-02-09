@@ -21,6 +21,8 @@ README = """A sample and productive personal documents library
 install_requires = [
     'PyYAML',
     'autoupgrade',
+    'bottle',
+    'Mako',
 ]
 
 setup_requires = [
@@ -50,7 +52,8 @@ setup(
     test_suite="edocuments",
     entry_points={
         "console_scripts": [
-            "edocuments-gui = edocuments:gui_main"
+            "edocuments-gui = edocuments:gui_main",
+            "edocuments-cmd = edocuments:cmd_main",
         ],
     }
 )
