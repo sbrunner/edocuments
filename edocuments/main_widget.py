@@ -98,7 +98,8 @@ class MainWindow(QMainWindow):
         cmds = self.ui.scan_type.currentData().get("cmds")
         filename = process(
             cmds, destination_filename=self.filename(),
-            progress=self.progress, progress_text='{display}'
+            progress=self.progress, progress_text='{display}',
+            main_window=self, status_test='{cmd}',
         )
 
         self.scan_end.emit()

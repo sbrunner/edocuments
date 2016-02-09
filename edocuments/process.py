@@ -10,7 +10,8 @@ import edocuments
 
 def process(
         names, filename=None, destination_filename=None,
-        in_extention=None, progress=None, progress_text=""):
+        in_extention=None, progress=None, progress_text="",
+        main_window=None, status_text=""):
     cmds = edocuments.config.get("cmds", {})
     out_ext = in_extention
 
@@ -56,6 +57,8 @@ def process(
             cmd_cmd = cmd_cmd.format(**params)
 
             print("{name}: {cmd}".format(name=name, cmd=cmd_cmd))
+            if main_window is not None:
+                main_window.setStatus(status_text.format(name=name, **cmd))
             if progress is not None:
                 progress.setLabelText(progress_text.format(name=name, **cmd))
                 if progress.wasCanceled():
