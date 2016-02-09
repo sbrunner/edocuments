@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>eDocuments - a Simple and Productive Personal Documents Library</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../../ressources/edocuments.svg</normaloff>../../ressources/edocuments.svg</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
@@ -165,7 +169,7 @@
      <x>0</x>
      <y>0</y>
      <width>583</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuUpdate_library">
