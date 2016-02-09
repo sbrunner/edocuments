@@ -6,6 +6,7 @@ from os import path
 from threading import Thread
 from subprocess import call
 from PyQt5.Qt import Qt
+from PyQt4.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, \
     QErrorMessage, QMessageBox, QProgressDialog
 import edocuments
@@ -34,6 +35,9 @@ class MainWindow(QMainWindow):
         self.ui.scan_start.clicked.connect(self.scan_start)
 
         self.image_dialog = Dialog()
+
+        scan_end = pyqtSignal()
+        scan_end.connect(self.end_scan)
 
     def scan_browse(self, event):
         filename = QFileDialog.getSaveFileName(
@@ -96,6 +100,10 @@ class MainWindow(QMainWindow):
             cmds, destination_filename=self.filename(),
             progress=self.progress, progress_text='{display}'
         )
+
+        self.scan_end.emit()
+
+    def end_scan(self):
         self.progress.hide()
 
         self.image_dialog.set_image(filename)
