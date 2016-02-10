@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import sys
 import re
 import pathlib
 from os import path
@@ -36,8 +37,11 @@ class MainWindow(QMainWindow):
 
         self.image_dialog = Dialog()
 
-        scan_end = pyqtSignal(str)
-        scan_end.connect(self.end_scan)
+        self.scan_end = pyqtSignal(str)
+        self.scan_end.connect(self.end_scan)
+
+        self.scan_error = pyqtSignal(str)
+        self.scan_error.connect(self.on_scan_error)
 
     def scan_browse(self, event):
         filename = QFileDialog.getSaveFileName(
@@ -72,7 +76,8 @@ class MainWindow(QMainWindow):
             msg.setWindowTitle("Scanning...")
             msg.setText("The destination file already exists")
             msg.setInformativeText("Do you want to overwrite it?")
-            msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel | QMessageBox.Open)
+            msg.setStandardButtons(
+                QMessageBox.Ok | QMessageBox.Cancel | QMessageBox.Open)
             ret = msg.exec()
             if ret == QMessageBox.Ok:
                 self._scan()
@@ -86,7 +91,8 @@ class MainWindow(QMainWindow):
     def _scan(self):
         cmds = self.ui.scan_type.currentData().get("cmds")
 
-        self.progress = QProgressDialog("Scanning...", "Cancel", 0, len(cmds), self)
+        self.progress = QProgressDialog(
+            "Scanning...", "Cancel", 0, len(cmds), self)
         self.progress.setWindowTitle("Scanning...")
         self.progress.setWindowModality(Qt.WindowModal)
         self.progress.show()
@@ -96,11 +102,14 @@ class MainWindow(QMainWindow):
 
     def _do_scan(self):
         cmds = self.ui.scan_type.currentData().get("cmds")
-        filename = process(
-            cmds, destination_filename=self.filename(),
-            progress=self.progress, progress_text='{display}',
-            main_window=self, status_test='{cmd}',
-        )
+        try:
+            filename = process(
+                cmds, destination_filename=self.filename(),
+                progress=self.progress, progress_text='{display}',
+                main_window=self, status_test='{cmd}',
+            )
+        except:
+            self.scan_error.emit(sys.exc_info()[0])
 
         self.scan_end.emit(filename)
 
@@ -115,3 +124,8 @@ class MainWindow(QMainWindow):
             lambda m: ' ' + str(int(m.group(1)) + 1),
             self.ui.scan_to.text()
         ))
+
+    def on_scan_error(self, error):
+        err = QErrorMessage(self)
+        err.setWindowTitle("eDocuments - scan error")
+        err.showMessage(error)
