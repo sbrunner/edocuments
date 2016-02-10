@@ -9,14 +9,18 @@ from subprocess import call
 from PyQt5.Qt import Qt
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, \
-    QErrorMessage, QMessageBox, QProgressDialog
+    QErrorMessage, QMessageBox, QProgressDialog, QListWidgetItem
 import edocuments
 from edocuments.process import process, destination_filename
+from edocuments.index import index
 from edocuments.ui.main import Ui_MainWindow
 from edocuments.label_dialog import Dialog
 
 
 class MainWindow(QMainWindow):
+    scan_end = pyqtSignal(str)
+    scan_error = pyqtSignal(str)
+
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
@@ -37,11 +41,19 @@ class MainWindow(QMainWindow):
 
         self.image_dialog = Dialog()
 
-        self.scan_end = pyqtSignal(str)
         self.scan_end.connect(self.end_scan)
-
-        self.scan_error = pyqtSignal(str)
         self.scan_error.connect(self.on_scan_error)
+
+        self.ui.search_text.textChanged.connect(self.search_change)
+        self.ui.search_btn.clicked.connect(self.search)
+
+    def search_change(self, text):
+        pass
+
+    def search(self):
+        for result in index.search(self.ui.search_text.text()):
+            QListWidgetItem(result, self.ui.search_result_list)
+            # self.ui.search_result_list.insertItem
 
     def scan_browse(self, event):
         filename = QFileDialog.getSaveFileName(
@@ -112,6 +124,16 @@ class MainWindow(QMainWindow):
             self.scan_error.emit(sys.exc_info()[0])
 
         self.scan_end.emit(filename)
+
+        cmds = self.ui.scan_type.currentData().get("postprocess", [])
+        try:
+            filename = process(
+                cmds, destination_filename=self.filename(),
+                progress=self.progress, progress_text='{display}',
+                main_window=self, status_test='{cmd}',
+            )
+        except:
+            self.scan_error.emit(sys.exc_info()[0])
 
     def end_scan(self, filename):
         self.progress.hide()

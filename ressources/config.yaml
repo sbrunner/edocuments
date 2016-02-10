@@ -13,6 +13,8 @@ scans:
     - crop
     - 2png
     - auto-rotate
+    postprocess:
+    - optipng
 
   - name: Black & White
     default: true
@@ -22,6 +24,8 @@ scans:
     - cleanup
     - 2png
     - auto-rotate
+    postprocess:
+    - optipng
 
 to_txt:
   - extention: png
@@ -29,9 +33,6 @@ to_txt:
     - ocr
 
 open_cmd: gnome-open
-
-postprocess:
-- optipng
 
 task:
   - name: "Optimise images"

@@ -25,7 +25,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="search">
        <attribute name="title">
@@ -48,18 +48,6 @@
            </widget>
           </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="groupBox_2">
-          <property name="title">
-           <string>Advance query</string>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_7">
-           <item>
-            <widget class="QPlainTextEdit" name="advance_query"/>
-           </item>
-          </layout>
-         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
@@ -169,7 +157,7 @@
      <x>0</x>
      <y>0</y>
      <width>583</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuUpdate_library">
