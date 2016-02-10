@@ -6,6 +6,7 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
+from threading import Thread
 from yaml import load
 from argparse import ArgumentParser
 from bottle import mako_template
@@ -27,10 +28,11 @@ else:
 config = {}
 root_folder = None
 settings = None
+main_window = None
 
 
 def gui_main():
-    global config, root_folder, settings
+    global config, root_folder, settings, main_window
     with open(CONFIG_PATH) as f:
         config = load(f.read())
     root_folder = "%s/%s/" % (
@@ -40,15 +42,26 @@ def gui_main():
     settings = QSettings("org", "edocuments")
 
     app = QApplication(sys.argv)
-    mw = MainWindow()
+    main_window = MainWindow()
     if settings.value("geometry") is not None:
-        mw.restoreGeometry(settings.value("geometry"))
+        main_window.restoreGeometry(settings.value("geometry"))
     if settings.value("state") is not None:
-        mw.restoreState(settings.value("state"))
+        main_window.restoreState(settings.value("state"))
 
+    t = Thread(target=autoupgrade)
+    t.start()
+
+    main_window.show()
+    app.exec()
+    settings.setValue("geometry", main_window.saveGeometry())
+    settings.setValue("state", main_window.saveState())
+    settings.sync()
+
+
+def autoupgrade():
     au = AutoUpgrade('edocuments')
     if au.check():
-        msg = QMessageBox(mw)
+        msg = QMessageBox(main_window)
         msg.setWindowTitle("eDocuments - Upgrade")
         msg.setText("A new version is available")
         msg.setInformativeText("Do you want to do anupdate and restart?")
@@ -57,12 +70,6 @@ def gui_main():
         if ret == QMessageBox.Yes:
             au.upgrade(dependencies=True)
             au.restart()
-
-    mw.show()
-    app.exec()
-    settings.setValue("geometry", mw.saveGeometry())
-    settings.setValue("state", mw.saveState())
-    settings.sync()
 
 
 def cmd_main():

@@ -30,20 +30,20 @@ class Index:
             self.index = open_dir("/home/sbrunner/.docindex")
         self.writer = self.index.writer()
 
-    def add(self, path, text_file):
+    def get(self, path):
         with self.index.searcher() as searcher:
+            return searcher.search(Term("path_id", path))
 
-            query = Term("path_id", path)
 # TODO: update
 # http://pythonhosted.org//Whoosh/indexing.html#updating-documents
-            if len(searcher.search(query)) == 0:
-                with text_file.open() as f:
-                    self.writer.add_document(
-                        path_id=path.__str__(),
-                        path=path.__str__(),
-                        content="%s\n%s" % (path.__str__(), f.read()),
-                        date=path.stat().st_mtime)
-                    self.dirty = True
+    def add(self, path, text):
+        if len(self.get(path)):
+            self.writer.add_document(
+                path_id=path.__str__(),
+                path=path.__str__(),
+                content="%s\n%s" % (path.__str__(), text),
+                date=path.stat().st_mtime)
+            self.dirty = True
 
     def save(self):
         if self.dirty:

@@ -28,18 +28,27 @@ scans:
     - optipng
 
 to_txt:
-  - extention: png
+  - extension: png
     cmds:
     - ocr
+  - extension: jpeg
+    cmds:
+    - ocr
+  - extension: pdf
+    cmds:
+    - pdf2txt
+  - extension: txt
+    cmds:
+    - cp
 
 open_cmd: gnome-open
 
 task:
-  - name: "Optimise images"
-    on: "*.png"
+  - name: Optimise images
+    on_ext: png
     cmds:
     - optipng
-  - name: "Fix files names"
+  - name: Fix files names
     cmds:
     - fixextensions_case
     - fixextensions_jpeg
@@ -75,6 +84,16 @@ cmds:
     ocr:
         display: Optical character recognition.
         cmd: "tesseract -l ${lang} {in} {out}"
+        out_ext: txt
+
+    pdf2txt:
+        display: Optical character recognition.
+        cmd: "pdftotext {in} {out}"
+        out_ext: txt
+
+    cp:
+        display: Copy.
+        cmd: "cp {in} {out}"
 
     optipng:
         display: Compress the picture.

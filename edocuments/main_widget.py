@@ -3,9 +3,11 @@
 import sys
 import re
 import pathlib
+import traceback
 from os import path
 from threading import Thread
 from subprocess import call
+from pathlib import Path
 from PyQt5.Qt import Qt
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, \
@@ -47,6 +49,8 @@ class MainWindow(QMainWindow):
         self.ui.search_text.textChanged.connect(self.search_change)
         self.ui.search_btn.clicked.connect(self.search)
 
+        self.ui.library_update.triggered.connect(self.update_library)
+
     def search_change(self, text):
         pass
 
@@ -65,6 +69,29 @@ class MainWindow(QMainWindow):
             filename = filename[len(edocuments.root_folder):]
         self.ui.scan_to.setText(filename)
 
+    def update_library(self):
+        t = Thread(target=self._do_update_library)
+        t.start()
+
+    def _do_update_library(self):
+        for conv in edocuments.config.get('to_txt'):
+            for filename in Path("/home/sbrunner/dsl").rglob(
+                    "*." + conv.get('extension')):
+                if len(index.get(str(filename))) == 0:
+                    cmds = conv.get("cmds")
+                    try:
+                        text, extension = process(
+                            cmds, filename=str(filename), get_content=True,
+                            main_window=self, status_text='{cmd}',
+                        )
+                        if text is None:
+                            text = ''
+                        index.add(str(filename), text)
+                    except:
+                        self.scan_error.emit(traceback.format_exc())
+                        raise
+        index.save()
+
     def filename(self):
         filename = self.ui.scan_to.text()
         if len(filename) == 0 or filename[0] != '/':
@@ -78,7 +105,7 @@ class MainWindow(QMainWindow):
             err.showMessage("The destination is a directory!")
             return
 
-        destination = destination_filename(
+        destination, extension = destination_filename(
             self.ui.scan_type.currentData().get("cmds"),
             self.filename()
         )
@@ -115,10 +142,10 @@ class MainWindow(QMainWindow):
     def _do_scan(self):
         cmds = self.ui.scan_type.currentData().get("cmds")
         try:
-            filename = process(
+            filename, extension = process(
                 cmds, destination_filename=self.filename(),
                 progress=self.progress, progress_text='{display}',
-                main_window=self, status_test='{cmd}',
+                main_window=self, status_text='{cmd}',
             )
         except:
             self.scan_error.emit(sys.exc_info()[0])
@@ -127,11 +154,26 @@ class MainWindow(QMainWindow):
 
         cmds = self.ui.scan_type.currentData().get("postprocess", [])
         try:
-            filename = process(
+            filename, extension = process(
                 cmds, destination_filename=self.filename(),
-                progress=self.progress, progress_text='{display}',
-                main_window=self, status_test='{cmd}',
+                in_extention=extension,
+                main_window=self, status_text='{cmd}',
             )
+            conv = [
+                c for c in self.config.get('to_txt')
+                if c['extension'] == extension
+            ]
+            if len(conv) >= 1:
+                conv = conv[0]
+                cmds = conv.get("cmds")
+                try:
+                    text, extension = process(
+                        cmds, filename=filename, get_content=True,
+                        main_window=self, status_text='{cmd}',
+                    )
+                    index.add(filename, text)
+                except:
+                    self.scan_error.emit(sys.exc_info()[0])
         except:
             self.scan_error.emit(sys.exc_info()[0])
 

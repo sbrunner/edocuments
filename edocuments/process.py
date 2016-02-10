@@ -10,7 +10,8 @@ import edocuments
 
 def process(
         names, filename=None, destination_filename=None,
-        in_extention=None, progress=None, progress_text="",
+        in_extention=None, get_content=False,
+        progress=None, progress_text="",
         main_window=None, status_text=""):
     cmds = edocuments.config.get("cmds", {})
     out_ext = in_extention
@@ -49,16 +50,17 @@ def process(
             params = {}
 
             if filename is not None:
-                params["in"] = "'%s'" % filename.replace("'", "'\''")
+                params["in"] = "'%s'" % filename.replace("'", "'\"'\"'")
 
             if not inplace:
-                params["out"] = "'%s'" % out_name.replace("'", "'\''")
+                params["out"] = "'%s'" % out_name.replace("'", "'\"'\"'")
 
             cmd_cmd = cmd_cmd.format(**params)
 
             print("{name}: {cmd}".format(name=name, cmd=cmd_cmd))
             if main_window is not None:
-                main_window.setStatus(status_text.format(name=name, **cmd))
+                main_window.statusBar().showMessage(
+                    status_text.format(name=name, cmd=cmd_cmd, **cmd))
             if progress is not None:
                 progress.setLabelText(progress_text.format(name=name, **cmd))
                 if progress.wasCanceled():
@@ -69,23 +71,31 @@ def process(
 
             filename = out_name
 
-    if original_filename is not None and original_filename != filename:
-        os.unlink(original_filename)
-    if out_ext is not None:
-        destination_filename = "%s.%s" % (re.sub(
-            r"\.[a-z0-9A-Z]{2,5}$", "",
-            destination_filename
-        ), out_ext)
-    if filename != destination_filename:
-        directory = os.path.dirname(destination_filename)
-        print(directory)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+    if get_content:
+        content = None
+        if os.path.exists(filename):
+            with open(filename) as f:
+                content = f.read()
+            if original_filename is None or original_filename != filename:
+                os.unlink(filename)
+        return content, out_ext
+    else:
+        if original_filename is not None and original_filename != filename:
+            os.unlink(original_filename)
+        if out_ext is not None:
+            destination_filename = "%s.%s" % (re.sub(
+                r"\.[a-z0-9A-Z]{2,5}$", "",
+                destination_filename
+            ), out_ext)
+        if filename != destination_filename:
+            directory = os.path.dirname(destination_filename)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
 
-        copyfile(filename, destination_filename)
-        os.unlink(filename)
+            copyfile(filename, destination_filename)
+            os.unlink(filename)
 
-    return destination_filename
+        return destination_filename, out_ext
 
 
 def _rename(cmd, destination_filename):
@@ -101,7 +111,7 @@ def _rename(cmd, destination_filename):
     return re.sub(from_re, to_re, destination_filename)
 
 
-def destination_filename(names, filename, extention=None):
+def destination_filename(names, filename, extension=None):
     cmds = edocuments.config.get("cmds", {})
 
     for name in names:
@@ -116,11 +126,11 @@ def destination_filename(names, filename, extention=None):
             filename = _rename(cmd, filename)
         else:
             if 'out_ext' in cmd:
-                extention = cmd['out_ext']
+                extension = cmd['out_ext']
 
-    if extention is not None:
+    if extension is not None:
         filename = "%s.%s" % (re.sub(
             r"\.[a-z0-9A-Z]{2,5}$", "",
             filename
-        ), extention)
-    return filename
+        ), extension)
+    return filename, extension

@@ -164,14 +164,20 @@
     <property name="title">
      <string>&amp;Library</string>
     </property>
-    <addaction name="actionUpdate"/>
+    <addaction name="library_update"/>
+    <addaction name="library_reset"/>
    </widget>
    <addaction name="menuUpdate_library"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionUpdate">
+  <action name="library_update">
    <property name="text">
     <string>&amp;Update</string>
+   </property>
+  </action>
+  <action name="library_reset">
+   <property name="text">
+    <string>Reset</string>
    </property>
   </action>
  </widget>
