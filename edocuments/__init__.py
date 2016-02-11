@@ -37,10 +37,7 @@ def gui_main():
     global config, root_folder, settings, main_window, pool
     with open(CONFIG_PATH) as f:
         config = load(f.read())
-    root_folder = "%s/%s/" % (
-        os.path.expanduser('~'),
-        config.get("root_folder"),
-    )
+    root_folder = os.path.expanduser(config.get("root_folder"))
     settings = QSettings("org", "edocuments")
     pool = Pool(config.get('nb_process', 8))
 
