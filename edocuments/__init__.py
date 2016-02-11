@@ -7,6 +7,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from threading import Thread
+from multiprocessing import Pool
 from yaml import load
 from argparse import ArgumentParser
 from bottle import mako_template
@@ -29,10 +30,11 @@ config = {}
 root_folder = None
 settings = None
 main_window = None
+pool = None
 
 
 def gui_main():
-    global config, root_folder, settings, main_window
+    global config, root_folder, settings, main_window, pool
     with open(CONFIG_PATH) as f:
         config = load(f.read())
     root_folder = "%s/%s/" % (
@@ -40,6 +42,7 @@ def gui_main():
         config.get("root_folder"),
     )
     settings = QSettings("org", "edocuments")
+    pool = Pool(config.get('nb_process', 8))
 
     app = QApplication(sys.argv)
     main_window = MainWindow()

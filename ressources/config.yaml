@@ -1,6 +1,8 @@
 #lang:
 
 root_folder: "dsl/Documents"
+save_interval: 60
+nb_process: 8
 
 scan_comments: |
     Recomanded file names:

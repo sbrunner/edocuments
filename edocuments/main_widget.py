@@ -7,6 +7,7 @@ import traceback
 from os import path
 from threading import Thread
 from subprocess import call
+from datetime import datetime, timedelta
 from pathlib import Path
 from PyQt5.Qt import Qt
 from PyQt5.QtCore import pyqtSignal
@@ -74,23 +75,55 @@ class MainWindow(QMainWindow):
         t.start()
 
     def _do_update_library(self):
+        progress = QProgressDialog(
+            "Scanning...", None, 0, 1000, self)
+        progress.setWindowTitle('Updating the library...')
+        progress.setLabelText('Browsing the files...')
+        progress.setWindowModality(Qt.WindowModal)
+        progress.show()
+
+        todo = []
         for conv in edocuments.config.get('to_txt'):
-            for filename in Path("/home/sbrunner/dsl").rglob(
+            cmds = conv.get("cmds")
+            for filename in Path(edocuments.root_folder).rglob(
                     "*." + conv.get('extension')):
-                if len(index.get(str(filename))) == 0:
-                    cmds = conv.get("cmds")
-                    try:
-                        text, extension = process(
-                            cmds, filename=str(filename), get_content=True,
-                            main_window=self, status_text='{cmd}',
-                        )
-                        if text is None:
-                            text = ''
-                        index.add(str(filename), text)
-                    except:
-                        self.scan_error.emit(traceback.format_exc())
-                        raise
+                todo.append((str(filename), cmds))
+
+        nb = len(todo)
+
+        results = edocuments.pool.imap_unordered(_to_txt, todo)
+
+        progress.setLabelText('Parsing the files...')
+
+        interval = timedelta(
+            seconds=edocuments.config.get('save_interval', 60))
+        last_save = datetime.now()
+
+        nb_error = 0
+        nb_empty = 0
+        no = 0
+        for filename, text in results:
+            no += 1
+            print("%i / %i" % (no, nb))
+            progress.setValue(no * 1000 / nb)
+
+            if text is False:
+                nb_error += 1
+            elif text is None:
+                nb_empty += 1
+            else:
+                index.add(filename, text)
+
+            if datetime.now() - last_save > interval:
+                index.save()
+                last_save = datetime.now()
+
         index.save()
+
+        if nb_error != 0:
+            self.scan_error.emit("Finished with %i errors" % nb_error)
+        if nb_empty != 0:
+            self.scan_error.emit("Finished with %i without text" % nb_empty)
 
     def filename(self):
         filename = self.ui.scan_to.text()
@@ -193,3 +226,17 @@ class MainWindow(QMainWindow):
         err = QErrorMessage(self)
         err.setWindowTitle("eDocuments - scan error")
         err.showMessage(error)
+
+
+def _to_txt(job):
+    filename, cmds = job
+    try:
+        if len(index.get(str(filename))) == 0:
+            text, extension = process(
+                cmds, filename=str(filename), get_content=True,
+            )
+            return filename, text
+        return filename, False
+    except:
+        traceback.print_exc()
+        return filename, False

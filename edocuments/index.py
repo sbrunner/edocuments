@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import os
+from pathlib import Path
 from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, ID, TEXT, STORED
 from whoosh.qparser import QueryParser
 from whoosh.query import Term
+import edocuments
 
 
 class Index:
@@ -25,9 +27,9 @@ class Index:
         if not os.path.exists(self.directory):
             os.makedirs(self.directory)
 # KEYWORD(lowercase=True)
-            self.index = create_in("/home/sbrunner/.docindex", schema)
+            self.index = create_in(self.directory, schema)
         else:
-            self.index = open_dir("/home/sbrunner/.docindex")
+            self.index = open_dir(self.directory)
         self.writer = self.index.writer()
 
     def get(self, path):
@@ -36,13 +38,16 @@ class Index:
 
 # TODO: update
 # http://pythonhosted.org//Whoosh/indexing.html#updating-documents
-    def add(self, path, text):
-        if len(self.get(path)):
+    def add(self, filename, text):
+        date = Path(filename).stat().st_mtime
+        if filename[:len(edocuments.root_folder)] == edocuments.root_folder:
+            filename = filename[len(edocuments.root_folder):]
+        if len(self.get(filename)):
             self.writer.add_document(
-                path_id=path.__str__(),
-                path=path.__str__(),
-                content="%s\n%s" % (path.__str__(), text),
-                date=path.stat().st_mtime)
+                path_id=filename,
+                path=filename,
+                content="%s\n%s" % (filename, text),
+                date=date)
             self.dirty = True
 
     def save(self):
