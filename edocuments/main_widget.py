@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
             cmds = conv.get("cmds")
             for filename in Path(edocuments.root_folder).rglob(
                     "*." + conv.get('extension')):
-                if len(index.get(str(filename))) == 0:
+                if index.get_nb(str(filename)) == 0:
                     todo.append((str(filename), cmds))
 
         nb = len(todo)

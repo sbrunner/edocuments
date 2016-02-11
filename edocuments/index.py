@@ -32,9 +32,9 @@ class Index:
             self.index = open_dir(self.directory)
         self.writer = self.index.writer()
 
-    def get(self, filename):
+    def get_nb(self, filename):
         with self.index.searcher() as searcher:
-            return searcher.search(Term("path_id", filename))
+            return len(searcher.search(Term("path_id", filename)))
 
 # TODO: update
 # http://pythonhosted.org//Whoosh/indexing.html#updating-documents
@@ -42,7 +42,7 @@ class Index:
         date = Path(filename).stat().st_mtime
         if filename[:len(edocuments.root_folder)] == edocuments.root_folder:
             filename = filename[len(edocuments.root_folder):]
-        if len(self.get(filename)) == 0:
+        if self.get_nb(filename) == 0:
             self.writer.add_document(
                 path_id=filename,
                 path=filename,
@@ -52,7 +52,9 @@ class Index:
 
     def save(self):
         if self.dirty:
+            print('Save index.')
             self.writer.commit(optimize=True)
+            self.writer = self.index.writer()
 
     def search(self, text):
         start = datetime.now()
