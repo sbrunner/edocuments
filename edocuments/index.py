@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+from datetime import datetime
 from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, ID, TEXT, STORED
 from whoosh.qparser import QueryParser
@@ -26,15 +27,14 @@ class Index:
 
         if not os.path.exists(self.directory):
             os.makedirs(self.directory)
-# KEYWORD(lowercase=True)
             self.index = create_in(self.directory, schema)
         else:
             self.index = open_dir(self.directory)
         self.writer = self.index.writer()
 
-    def get(self, path):
+    def get(self, filename):
         with self.index.searcher() as searcher:
-            return searcher.search(Term("path_id", path))
+            return searcher.search(Term("path_id", filename))
 
 # TODO: update
 # http://pythonhosted.org//Whoosh/indexing.html#updating-documents
@@ -42,7 +42,7 @@ class Index:
         date = Path(filename).stat().st_mtime
         if filename[:len(edocuments.root_folder)] == edocuments.root_folder:
             filename = filename[len(edocuments.root_folder):]
-        if len(self.get(filename)):
+        if len(self.get(filename)) == 0:
             self.writer.add_document(
                 path_id=filename,
                 path=filename,
@@ -55,13 +55,17 @@ class Index:
             self.writer.commit(optimize=True)
 
     def search(self, text):
-        with self.index.searcher() as searcher:
-            query = self.parser_path.parse(text)
+        start = datetime.now()
+        try:
+            with self.index.searcher() as searcher:
+                query = self.parser_path.parse(text)
 
-            results = searcher.search(query)
-            if len(results) == 0:
-                query = self.parser_content.parse(text)
-                return searcher.search(query)
-            return results
+                results = searcher.search(query)
+                if len(results) == 0:
+                    query = self.parser_content.parse(text)
+                    return searcher.search(query)
+                return results
+        finally:
+            print('search in %s.' % datetime.now() - start)
 
 index = Index()

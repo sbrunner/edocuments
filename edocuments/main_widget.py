@@ -87,30 +87,28 @@ class MainWindow(QMainWindow):
             cmds = conv.get("cmds")
             for filename in Path(edocuments.root_folder).rglob(
                     "*." + conv.get('extension')):
-                todo.append((str(filename), cmds))
+                if len(index.get(str(filename))) == 0:
+                    todo.append((str(filename), cmds))
 
         nb = len(todo)
 
         results = edocuments.pool.imap_unordered(_to_txt, todo)
-
-        progress.setLabelText('Parsing the files...')
 
         interval = timedelta(
             seconds=edocuments.config.get('save_interval', 60))
         last_save = datetime.now()
 
         nb_error = 0
-        nb_empty = 0
         no = 0
+        progress.setLabelText('Parsing the files %i/%i.' % (no, nb))
         for filename, text in results:
             no += 1
-            print("%i / %i" % (no, nb))
+            progress.setLabelText('Parsing the files %i/%i.' % (no, nb))
+            print("%i/%i" % (no, nb))
             progress.setValue(no * 1000 / nb)
 
             if text is False:
                 nb_error += 1
-            elif text is None:
-                nb_empty += 1
             else:
                 index.add(filename, text)
 
@@ -122,8 +120,6 @@ class MainWindow(QMainWindow):
 
         if nb_error != 0:
             self.scan_error.emit("Finished with %i errors" % nb_error)
-        if nb_empty != 0:
-            self.scan_error.emit("Finished with %i without text" % nb_empty)
 
     def filename(self):
         filename = self.ui.scan_to.text()
@@ -231,12 +227,12 @@ class MainWindow(QMainWindow):
 def _to_txt(job):
     filename, cmds = job
     try:
-        if len(index.get(str(filename))) == 0:
-            text, extension = process(
-                cmds, filename=str(filename), get_content=True,
-            )
-            return filename, text
-        return filename, False
+        text, extension = process(
+            cmds, filename=str(filename), get_content=True,
+        )
+        if text is None:
+            text = ''
+        return filename, text
     except:
         traceback.print_exc()
         return filename, False
