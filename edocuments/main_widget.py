@@ -23,6 +23,7 @@ from edocuments.label_dialog import Dialog
 class MainWindow(QMainWindow):
     scan_end = pyqtSignal(str)
     scan_error = pyqtSignal(str)
+    update_update_library_progress = pyqtSignal(int, str)
 
     def __init__(self):
         super().__init__()
@@ -46,6 +47,8 @@ class MainWindow(QMainWindow):
 
         self.scan_end.connect(self.end_scan)
         self.scan_error.connect(self.on_scan_error)
+        self.update_update_library_progress.connect(
+            self.on_update_update_library_progress)
 
         self.ui.search_text.textChanged.connect(self.search_change)
         self.ui.search_btn.clicked.connect(self.search)
@@ -71,17 +74,21 @@ class MainWindow(QMainWindow):
         self.ui.scan_to.setText(filename)
 
     def update_library(self):
+        self.update_library_progress = QProgressDialog(
+            "Scanning...", None, 0, 100, self)
+        self.update_library_progress.setWindowTitle('Updating the library...')
+        self.update_library_progress.setLabelText('Browsing the files...')
+        self.update_library_progress.setWindowModality(Qt.WindowModal)
+        self.update_library_progress.show()
+
         t = Thread(target=self._do_update_library)
         t.start()
 
-    def _do_update_library(self):
-        progress = QProgressDialog(
-            "Scanning...", None, 0, 1000, self)
-        progress.setWindowTitle('Updating the library...')
-        progress.setLabelText('Browsing the files...')
-        progress.setWindowModality(Qt.WindowModal)
-        progress.show()
+    def on_update_update_library_progress(self, pos, text):
+        self.update_library_progress.setValue(pos)
+        self.update_library_progress.setLabelText(text)
 
+    def _do_update_library(self):
         todo = []
         for conv in edocuments.config.get('to_txt'):
             cmds = conv.get("cmds")
@@ -89,6 +96,8 @@ class MainWindow(QMainWindow):
                     "*." + conv.get('extension')):
                 if index.get_nb(str(filename)) == 0:
                     todo.append((str(filename), cmds))
+                    self.update_update_library_progress.emit(
+                        0, 'Browsing the files (%i)...' % len(todo))
 
         nb = len(todo)
 
@@ -100,12 +109,14 @@ class MainWindow(QMainWindow):
 
         nb_error = 0
         no = 0
-        progress.setLabelText('Parsing the files %i/%i.' % (no, nb))
+
+        self.update_update_library_progress.emit(
+            0, 'Parsing the files %i/%i.' % (no, nb))
         for filename, text in results:
             no += 1
-            progress.setLabelText('Parsing the files %i/%i.' % (no, nb))
+            self.update_update_library_progress.emit(
+                no * 100 / nb, 'Parsing the files %i/%i.' % (no, nb))
             print("%i/%i" % (no, nb))
-            progress.setValue(no * 1000 / nb)
 
             if text is False:
                 nb_error += 1
