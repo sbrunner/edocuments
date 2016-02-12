@@ -33,8 +33,7 @@ class Index:
         self.writer = self.index.writer()
 
     def get_nb(self, filename):
-        if filename[:len(edocuments.root_folder)] == edocuments.root_folder:
-            filename = filename[len(edocuments.root_folder) + 1:]
+        filename = edocuments.short_path(filename)
         with self.index.searcher() as searcher:
             return len(searcher.search(Term("path_id", filename)))
 
@@ -42,8 +41,7 @@ class Index:
 # http://pythonhosted.org//Whoosh/indexing.html#updating-documents
     def add(self, filename, text):
         date = Path(filename).stat().st_mtime
-        if filename[:len(edocuments.root_folder)] == edocuments.root_folder:
-            filename = filename[len(edocuments.root_folder) + 1:]
+        filename = edocuments.short_path(filename)
         if self.get_nb(filename) == 0:
             self.writer.add_document(
                 path_id=filename,

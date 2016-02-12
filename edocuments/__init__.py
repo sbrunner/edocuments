@@ -33,11 +33,29 @@ main_window = None
 pool = None
 
 
+def short_path(filename):
+    global root_folder
+    if filename[:len(root_folder)] == root_folder:
+        return filename[len(root_folder):]
+    return filename
+
+
+def long_path(filename):
+    global root_folder
+    print(filename)
+    print(root_folder)
+    if len(filename) == 0 or filename[0] != '/':
+        return os.path.join(root_folder, filename)
+    return filename
+
+
 def gui_main():
     global config, root_folder, settings, main_window, pool
     with open(CONFIG_PATH) as f:
         config = load(f.read())
     root_folder = os.path.expanduser(config.get("root_folder"))
+    if root_folder[-1] != '/':
+        root_folder += '/'
     settings = QSettings("org", "edocuments")
     pool = Pool(config.get('nb_process', 8))
 

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 import re
 import pathlib
 import traceback
-from os import path
 from threading import Thread
 from subprocess import call
 from datetime import datetime, timedelta
@@ -42,6 +42,8 @@ class MainWindow(QMainWindow):
         self.ui.scan_browse.clicked.connect(self.scan_browse)
         self.ui.scan_to.returnPressed.connect(self.scan_start)
         self.ui.scan_start.clicked.connect(self.scan_start)
+        self.ui.open.clicked.connect(self.open_selected)
+        self.ui.open_folder.clicked.connect(self.open_folder)
 
         self.image_dialog = Dialog()
 
@@ -51,13 +53,33 @@ class MainWindow(QMainWindow):
             self.on_update_update_library_progress)
 
         self.ui.search_text.textChanged.connect(self.search)
-        self.ui.search_result_list.itemSelectionChanged.connect(self.selection_change)
+        self.ui.search_result_list.itemSelectionChanged.connect(
+            self.selection_change)
 
         self.ui.library_update.triggered.connect(self.update_library)
 
+    def open_selected(self):
+        item = self.ui.search_result_list.currentItem()
+        if item is not None:
+            cmd = edocuments.config.get('open_cmd').split(' ')
+            cmd.append(edocuments.long_path(item.result.get('path')))
+            call(cmd)
+
+    def open_folder(self):
+        item = self.ui.search_result_list.currentItem()
+        if item is not None:
+            cmd = edocuments.config.get('open_cmd').split(' ')
+            cmd.append(os.path.dirname(
+                edocuments.long_path(item.result.get('path'))))
+            call(cmd)
+
     def selection_change(self):
         item = self.ui.search_result_list.currentItem()
-        self.ui.search_result_text.document().setHtml(item.result.get('highlight'))
+        if item is not None:
+            self.ui.search_result_text.document().setHtml(
+                item.result.get('highlight'))
+        else:
+            self.ui.search_result_text.document().setHtml('')
 
     def search(self, text):
         model = self.ui.search_result_list.model()
@@ -72,8 +94,7 @@ class MainWindow(QMainWindow):
         )[0]
         filename = re.sub(r"\.[a-z0-9A-Z]{2,5}$", "", filename)
 
-        if filename[:len(edocuments.root_folder)] == edocuments.root_folder:
-            filename = filename[len(edocuments.root_folder) + 1:]
+        filename = edocuments.short_path(filename)
         self.ui.scan_to.setText(filename)
 
     def update_library(self):
@@ -136,10 +157,7 @@ class MainWindow(QMainWindow):
             self.scan_error.emit("Finished with %i errors" % nb_error)
 
     def filename(self):
-        filename = self.ui.scan_to.text()
-        if len(filename) == 0 or filename[0] != '/':
-            filename = path.join(edocuments.root_folder, filename)
-        return filename
+        return edocuments.long_filename(self.ui.scan_to.text())
 
     def scan_start(self, event=None):
         if pathlib.Path(self.filename()).is_dir():
