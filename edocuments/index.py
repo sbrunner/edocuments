@@ -67,9 +67,13 @@ class Index:
                 results = searcher.search(query)
                 if len(results) == 0:
                     query = self.parser_content.parse(text)
-                    return searcher.search(query)
-                return results
+                    results = searcher.search(query)
+                return [{
+                    'path': r.get('path'),
+                    'content': r.get('content'),
+                    'highlight': r.highlights('content'),
+                } for r in results]
         finally:
-            print('search in %s.' % datetime.now() - start)
+            print('search in %s.' % (datetime.now() - start))
 
 index = Index()

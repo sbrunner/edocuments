@@ -60,7 +60,8 @@ class MainWindow(QMainWindow):
 
     def search(self):
         for result in index.search(self.ui.search_text.text()):
-            QListWidgetItem(result, self.ui.search_result_list)
+            item = QListWidgetItem(result['path'], self.ui.search_result_list)
+            item.result = result
             # self.ui.search_result_list.insertItem
 
     def scan_browse(self, event):
