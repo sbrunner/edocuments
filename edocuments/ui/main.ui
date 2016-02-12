@@ -46,7 +46,7 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_5">
             <item>
-             <widget class="QTextBrowser" name="search_result_test"/>
+             <widget class="QTextBrowser" name="search_result_text"/>
             </item>
             <item>
              <widget class="QWidget" name="horizontalWidget" native="true">

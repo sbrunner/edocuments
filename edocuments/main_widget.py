@@ -50,20 +50,21 @@ class MainWindow(QMainWindow):
         self.update_update_library_progress.connect(
             self.on_update_update_library_progress)
 
-        self.ui.search_text.textChanged.connect(self.search_change)
-        self.ui.search_btn.clicked.connect(self.search)
+        self.ui.search_text.textChanged.connect(self.search)
+        self.ui.search_result_list.itemSelectionChanged.connect(self.selection_change)
 
         self.ui.library_update.triggered.connect(self.update_library)
 
-    def search_change(self, text):
+    def selection_change(self):
+        item = self.ui.search_result_list.currentItem()
+        self.ui.search_result_text.document().setHtml(item.result.get('highlight'))
+
+    def search(self, text):
         model = self.ui.search_result_list.model()
         model.removeRows(0, model.rowCount())
         for result in index.search(self.ui.search_text.text()):
             item = QListWidgetItem(result['path'], self.ui.search_result_list)
             item.result = result
-
-    def search(self):
-        pass
 
     def scan_browse(self, event):
         filename = QFileDialog.getSaveFileName(
