@@ -56,13 +56,14 @@ class MainWindow(QMainWindow):
         self.ui.library_update.triggered.connect(self.update_library)
 
     def search_change(self, text):
-        pass
-
-    def search(self):
+        model = self.ui.search_result_list.model()
+        model.removeRows(0, model.rowCount())
         for result in index.search(self.ui.search_text.text()):
             item = QListWidgetItem(result['path'], self.ui.search_result_list)
             item.result = result
-            # self.ui.search_result_list.insertItem
+
+    def search(self):
+        pass
 
     def scan_browse(self, event):
         filename = QFileDialog.getSaveFileName(
