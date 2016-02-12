@@ -1,5 +1,4 @@
 #lang:
-
 root_folder: "~/Documents"
 save_interval: 60
 nb_process: 8
@@ -85,7 +84,7 @@ cmds:
 
     ocr:
         display: Optical character recognition.
-        cmd: "tesseract -l ${lang} {in} {out}"
+        cmd: "tesseract -l ${lang} {in} stdout > {out}"
         out_ext: txt
 
     pdf2txt:
