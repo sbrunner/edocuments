@@ -33,6 +33,8 @@ class Index:
         self.writer = self.index.writer()
 
     def get_nb(self, filename):
+        if filename[:len(edocuments.root_folder)] == edocuments.root_folder:
+            filename = filename[len(edocuments.root_folder) + 1:]
         with self.index.searcher() as searcher:
             return len(searcher.search(Term("path_id", filename)))
 
@@ -41,7 +43,7 @@ class Index:
     def add(self, filename, text):
         date = Path(filename).stat().st_mtime
         if filename[:len(edocuments.root_folder)] == edocuments.root_folder:
-            filename = filename[len(edocuments.root_folder):]
+            filename = filename[len(edocuments.root_folder) + 1:]
         if self.get_nb(filename) == 0:
             self.writer.add_document(
                 path_id=filename,

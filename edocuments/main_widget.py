@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
         filename = re.sub(r"\.[a-z0-9A-Z]{2,5}$", "", filename)
 
         if filename[:len(edocuments.root_folder)] == edocuments.root_folder:
-            filename = filename[len(edocuments.root_folder):]
+            filename = filename[len(edocuments.root_folder) + 1:]
         self.ui.scan_to.setText(filename)
 
     def update_library(self):
