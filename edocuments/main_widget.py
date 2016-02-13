@@ -14,7 +14,7 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, \
     QErrorMessage, QMessageBox, QProgressDialog, QListWidgetItem
 import edocuments
-from edocuments.process import process, destination_filename
+from edocuments.process import Process
 from edocuments.index import index
 from edocuments.ui.main import Ui_MainWindow
 from edocuments.label_dialog import Dialog
@@ -29,6 +29,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.process = Process()
 
         self.ui.scan_comments.setText(edocuments.config.get("scan_comments"))
 
@@ -57,6 +58,7 @@ class MainWindow(QMainWindow):
             self.selection_change)
 
         self.ui.library_update.triggered.connect(self.update_library)
+        self.process.progress.connect(self.on_progress)
 
     def open_selected(self):
         item = self.ui.search_result_list.currentItem()
@@ -157,7 +159,7 @@ class MainWindow(QMainWindow):
             self.scan_error.emit("Finished with %i errors" % nb_error)
 
     def filename(self):
-        return edocuments.long_filename(self.ui.scan_to.text())
+        return edocuments.long_path(self.ui.scan_to.text())
 
     def scan_start(self, event=None):
         if pathlib.Path(self.filename()).is_dir():
@@ -166,7 +168,7 @@ class MainWindow(QMainWindow):
             err.showMessage("The destination is a directory!")
             return
 
-        destination, extension = destination_filename(
+        destination, extension = self.process.destination_filename(
             self.ui.scan_type.currentData().get("cmds"),
             self.filename()
         )
@@ -200,43 +202,55 @@ class MainWindow(QMainWindow):
         t = Thread(target=self._do_scan)
         t.start()
 
+    def on_progress(self, no, name, cmd_cmd, cmd):
+        if self.progress is not None:
+            self.progress.setValue(no)
+            self.progress.setLabelText(cmd.get('display', ''))
+            if self.progress.wasCanceled() is True:
+                print("Cancel")
+                self.process.cancel = True
+        self.statusBar().showMessage(cmd_cmd)
+
     def _do_scan(self):
         cmds = self.ui.scan_type.currentData().get("cmds")
         try:
-            filename, extension = process(
+            filename, extension = self.process.process(
                 cmds, destination_filename=self.filename(),
-                progress=self.progress, progress_text='{display}',
-                main_window=self, status_text='{cmd}',
             )
         except:
-            self.scan_error.emit(sys.exc_info()[0])
+            self.scan_error.emit(str(sys.exc_info()[0]))
+            raise
+
+        if filename is None:
+            return
 
         self.scan_end.emit(filename)
 
         cmds = self.ui.scan_type.currentData().get("postprocess", [])
         try:
-            filename, extension = process(
-                cmds, destination_filename=self.filename(),
+            filename, extension = self.process.process(
+                cmds, filename=filename,
+                destination_filename=self.filename(),
                 in_extention=extension,
-                main_window=self, status_text='{cmd}',
             )
             conv = [
-                c for c in self.config.get('to_txt')
+                c for c in edocuments.config.get('to_txt')
                 if c['extension'] == extension
             ]
             if len(conv) >= 1:
                 conv = conv[0]
                 cmds = conv.get("cmds")
                 try:
-                    text, extension = process(
+                    text, extension = self.process.process(
                         cmds, filename=filename, get_content=True,
-                        main_window=self, status_text='{cmd}',
                     )
                     index().add(filename, text)
                 except:
-                    self.scan_error.emit(sys.exc_info()[0])
+                    self.scan_error.emit(str(sys.exc_info()[0]))
+                    raise
         except:
-            self.scan_error.emit(sys.exc_info()[0])
+            self.scan_error.emit(str(sys.exc_info()[0]))
+            raise
 
     def end_scan(self, filename):
         self.progress.hide()
@@ -251,6 +265,7 @@ class MainWindow(QMainWindow):
         ))
 
     def on_scan_error(self, error):
+        print('Error: %s' % error)
         err = QErrorMessage(self)
         err.setWindowTitle("eDocuments - scan error")
         err.showMessage(error)
@@ -259,7 +274,7 @@ class MainWindow(QMainWindow):
 def _to_txt(job):
     filename, cmds = job
     try:
-        text, extension = process(
+        text, extension = Process().process(
             cmds, filename=str(filename), get_content=True,
         )
         if text is None:

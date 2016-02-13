@@ -62,7 +62,7 @@ cmds:
 
     scanc:
         display: Scanning...
-        cmd: "scanimage --format tiff --resolution 300 --gamma 1 -l 0 -t 0 -x 216.069 -y 297.011i > {out}"
+        cmd: "scanimage --format tiff --resolution 300 --gamma 1 -l 0 -t 0 -x 216.069 -y 297.011 > {out}"
         out_ext: tiff
 
     crop:
