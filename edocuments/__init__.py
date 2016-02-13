@@ -128,8 +128,8 @@ def cmd_main():
         if not Path(os.path.expanduser(
                     '~/.local/share/applications')).exists():
             os.makedirs(os.path.expanduser('~/.local/share/applications'))
-        ressource_dir = os.path.join(os.path.dirname(os.path.dirname(
-            os.path.abspath(__file__))), 'ressources')
+        ressource_dir = os.path.join(os.path.dirname(
+            os.path.abspath(__file__)), 'ressources')
         shutil.copyfile(
             os.path.join(ressource_dir, 'edocuments.desktop'),
             os.path.expanduser(
