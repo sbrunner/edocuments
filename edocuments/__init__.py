@@ -42,8 +42,6 @@ def short_path(filename):
 
 def long_path(filename):
     global root_folder
-    print(filename)
-    print(root_folder)
     if len(filename) == 0 or filename[0] != '/':
         return os.path.join(root_folder, filename)
     return filename
