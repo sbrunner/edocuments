@@ -1,0 +1,2 @@
+recursive-include edocuments/ressources *
+recursive-exclude edocuments/ressources .*.swp
