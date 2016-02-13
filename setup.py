@@ -7,14 +7,16 @@ from setuptools import setup, find_packages
 here = os.path.abspath(os.path.dirname(__file__))
 README = """A sample and productive personal documents library
 
-* Scan your documents
-  * Auto rotate
-  * index them on the file name and on the content (OCR)
+Scan your documents:
+* Auto rotate
+* index them on the file name and on the content (OCR)
 
-* Mange your pdf
-  * index them on the file name and on the content
+Mange your pdf:
+* index them on the file name and on the content
 
-* Search in your library
+Search in your library:
+* Build the index
+* Quick search using the index
 
 `Sources <https://github.com/sbrunner/personal-documents-library/>`_"""
 
