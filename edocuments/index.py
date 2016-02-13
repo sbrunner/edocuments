@@ -12,7 +12,7 @@ import edocuments
 
 class Index:
     directory = os.path.expanduser(
-        '~/.local/share/applications/edocuments/index')
+        '~/.local/share/edocuments/index')
     dirty = False
 
     def __init__(self):
