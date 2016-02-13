@@ -10,11 +10,10 @@ import edocuments
 
 
 class Index:
-    directory = os.path.expanduser(
-        '~/.local/share/edocuments/index')
-    dirty = False
 
     def __init__(self):
+        self.directory = os.path.join(edocuments.root_folder, '.index')
+        self.dirty = False
         schema = Schema(
             path_id=ID(stored=True, unique=True),
             path=TEXT(stored=True),
@@ -67,4 +66,12 @@ class Index:
                 ),
             } for r in results]
 
-index = Index()
+
+_index = None
+
+
+def index():
+    global _index
+    if _index is None:
+        _index = Index()
+    return _index

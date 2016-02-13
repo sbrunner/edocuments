@@ -84,7 +84,7 @@ class MainWindow(QMainWindow):
     def search(self, text):
         model = self.ui.search_result_list.model()
         model.removeRows(0, model.rowCount())
-        for result in index.search(self.ui.search_text.text()):
+        for result in index().search(self.ui.search_text.text()):
             item = QListWidgetItem(result['path'], self.ui.search_result_list)
             item.result = result
 
@@ -118,7 +118,7 @@ class MainWindow(QMainWindow):
             cmds = conv.get("cmds")
             for filename in Path(edocuments.root_folder).rglob(
                     "*." + conv.get('extension')):
-                if index.get_nb(str(filename)) == 0:
+                if index().get_nb(str(filename)) == 0:
                     todo.append((str(filename), cmds))
                     self.update_update_library_progress.emit(
                         0, 'Browsing the files (%i)...' % len(todo))
@@ -145,13 +145,13 @@ class MainWindow(QMainWindow):
             if text is False:
                 nb_error += 1
             else:
-                index.add(filename, text)
+                index().add(filename, text)
 
             if datetime.now() - last_save > interval:
-                index.save()
+                index().save()
                 last_save = datetime.now()
 
-        index.save()
+        index().save()
 
         if nb_error != 0:
             self.scan_error.emit("Finished with %i errors" % nb_error)
@@ -232,7 +232,7 @@ class MainWindow(QMainWindow):
                         cmds, filename=filename, get_content=True,
                         main_window=self, status_text='{cmd}',
                     )
-                    index.add(filename, text)
+                    index().add(filename, text)
                 except:
                     self.scan_error.emit(sys.exc_info()[0])
         except:
