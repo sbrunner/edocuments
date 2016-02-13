@@ -2,7 +2,6 @@
 
 import os
 from pathlib import Path
-from datetime import datetime
 from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, ID, TEXT, STORED
 from whoosh.qparser import QueryParser
@@ -52,26 +51,20 @@ class Index:
 
     def save(self):
         if self.dirty:
-            print('Save index.')
+            print('Saving index.')
             self.writer.commit(optimize=True)
             self.writer = self.index.writer()
 
     def search(self, text):
-        start = datetime.now()
-        try:
-            with self.index.searcher() as searcher:
-                query = self.parser_path.parse(text)
-
-                results = searcher.search(query)
-                if len(results) == 0:
-                    query = self.parser_content.parse(text)
-                    results = searcher.search(query)
-                return [{
-                    'path': r.get('path'),
-                    'content': r.get('content'),
-                    'highlight': r.highlights('content'),
-                } for r in results]
-        finally:
-            print('search in %s.' % (datetime.now() - start))
+        with self.index.searcher() as searcher:
+            query = self.parser_content.parse(text)
+            results = searcher.search(query, terms=True, limit=200)
+            return [{
+                'path': r.get('path'),
+                'content': r.get('content'),
+                'highlight': r.highlights(
+                    'path' if 'path_in' in r.matched_terms() else 'content'
+                ),
+            } for r in results]
 
 index = Index()
