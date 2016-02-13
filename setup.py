@@ -35,7 +35,7 @@ tests_require = install_requires + [
 
 setup(
     name="edocuments",
-    version="0.9.0",
+    version="0.8.2",
     description="eDocuments"
     " - a simple and productive personal documents library",
     long_description=README,
