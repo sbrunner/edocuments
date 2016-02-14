@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
 import re
 import pathlib
-import traceback
 from threading import Thread
 from subprocess import call
-from datetime import datetime, timedelta
 from pathlib import Path
 from PyQt5.Qt import Qt
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, \
     QErrorMessage, QMessageBox, QProgressDialog, QListWidgetItem
 import edocuments
-from edocuments.process import Process
+from edocuments.backend import Backend
 from edocuments.index import index
 from edocuments.ui.main import Ui_MainWindow
 from edocuments.label_dialog import Dialog
@@ -29,7 +26,8 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.process = Process()
+
+        self.backend = Backend()
 
         self.ui.scan_comments.setText(edocuments.config.get("scan_comments"))
 
@@ -58,7 +56,7 @@ class MainWindow(QMainWindow):
             self.selection_change)
 
         self.ui.library_update.triggered.connect(self.update_library)
-        self.process.progress.connect(self.on_progress)
+        self.backend.process.progress.connect(self.on_progress)
 
     def open_selected(self):
         item = self.ui.search_result_list.currentItem()
@@ -107,56 +105,12 @@ class MainWindow(QMainWindow):
         self.update_library_progress.setWindowModality(Qt.WindowModal)
         self.update_library_progress.show()
 
-        t = Thread(target=self._do_update_library)
+        t = Thread(target=self.backend.do_update_library)
         t.start()
 
     def on_update_update_library_progress(self, pos, text):
         self.update_library_progress.setValue(pos)
         self.update_library_progress.setLabelText(text)
-
-    def _do_update_library(self):
-        todo = []
-        for conv in edocuments.config.get('to_txt'):
-            cmds = conv.get("cmds")
-            for filename in Path(edocuments.root_folder).rglob(
-                    "*." + conv.get('extension')):
-                if index().get_nb(str(filename)) == 0:
-                    todo.append((str(filename), cmds))
-                    self.update_update_library_progress.emit(
-                        0, 'Browsing the files (%i)...' % len(todo))
-
-        nb = len(todo)
-
-        results = edocuments.pool.imap_unordered(_to_txt, todo)
-
-        interval = timedelta(
-            seconds=edocuments.config.get('save_interval', 60))
-        last_save = datetime.now()
-
-        nb_error = 0
-        no = 0
-
-        self.update_update_library_progress.emit(
-            0, 'Parsing the files %i/%i.' % (no, nb))
-        for filename, text in results:
-            no += 1
-            self.update_update_library_progress.emit(
-                no * 100 / nb, 'Parsing the files %i/%i.' % (no, nb))
-            print("%i/%i" % (no, nb))
-
-            if text is False:
-                nb_error += 1
-            else:
-                index().add(filename, text)
-
-            if datetime.now() - last_save > interval:
-                index().save()
-                last_save = datetime.now()
-
-        index().save()
-
-        if nb_error != 0:
-            self.scan_error.emit("Finished with %i errors" % nb_error)
 
     def filename(self):
         return edocuments.long_path(self.ui.scan_to.text())
@@ -168,7 +122,7 @@ class MainWindow(QMainWindow):
             err.showMessage("The destination is a directory!")
             return
 
-        destination, extension = self.process.destination_filename(
+        destination, extension = self.backend.process.destination_filename(
             self.ui.scan_type.currentData().get("cmds"),
             self.filename()
         )
@@ -199,7 +153,7 @@ class MainWindow(QMainWindow):
         self.progress.setWindowModality(Qt.WindowModal)
         self.progress.show()
 
-        t = Thread(target=self._do_scan)
+        t = Thread(target=self.backend.do_scan)
         t.start()
 
     def on_progress(self, no, name, cmd_cmd, cmd):
@@ -208,49 +162,8 @@ class MainWindow(QMainWindow):
             self.progress.setLabelText(cmd.get('display', ''))
             if self.progress.wasCanceled() is True:
                 print("Cancel")
-                self.process.cancel = True
+                self.backend.process.cancel = True
         self.statusBar().showMessage(cmd_cmd)
-
-    def _do_scan(self):
-        cmds = self.ui.scan_type.currentData().get("cmds")
-        try:
-            filename, extension = self.process.process(
-                cmds, destination_filename=self.filename(),
-            )
-        except:
-            self.scan_error.emit(str(sys.exc_info()[0]))
-            raise
-
-        if filename is None:
-            return
-
-        self.scan_end.emit(filename)
-
-        cmds = self.ui.scan_type.currentData().get("postprocess", [])
-        try:
-            filename, extension = self.process.process(
-                cmds, filename=filename,
-                destination_filename=self.filename(),
-                in_extention=extension,
-            )
-            conv = [
-                c for c in edocuments.config.get('to_txt')
-                if c['extension'] == extension
-            ]
-            if len(conv) >= 1:
-                conv = conv[0]
-                cmds = conv.get("cmds")
-                try:
-                    text, extension = self.process.process(
-                        cmds, filename=filename, get_content=True,
-                    )
-                    index().add(filename, text)
-                except:
-                    self.scan_error.emit(str(sys.exc_info()[0]))
-                    raise
-        except:
-            self.scan_error.emit(str(sys.exc_info()[0]))
-            raise
 
     def end_scan(self, filename):
         self.progress.hide()
@@ -269,17 +182,3 @@ class MainWindow(QMainWindow):
         err = QErrorMessage(self)
         err.setWindowTitle("eDocuments - scan error")
         err.showMessage(error)
-
-
-def _to_txt(job):
-    filename, cmds = job
-    try:
-        text, extension = Process().process(
-            cmds, filename=str(filename), get_content=True,
-        )
-        if text is None:
-            text = ''
-        return filename, text
-    except:
-        traceback.print_exc()
-        return filename, False
