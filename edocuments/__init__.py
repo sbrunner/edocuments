@@ -125,20 +125,22 @@ def cmd_main():
             exit('Works only on Debian base OS')
 
     if options.install:
-        if not Path(os.path.expanduser(
-                    '~/.local/share/applications')).exists():
-            os.makedirs(os.path.expanduser('~/.local/share/applications'))
-        ressource_dir = os.path.join(os.path.dirname(
-            os.path.abspath(__file__)), 'ressources')
-        shutil.copyfile(
-            os.path.join(ressource_dir, 'edocuments.desktop'),
-            os.path.expanduser(
-                '~/.local/share/applications/edocuments.desktop')
-        )
-        shutil.copyfile(
-            os.path.join(ressource_dir, 'edocuments.png'),
-            os.path.expanduser('~/.local/share/applications/edocuments.png')
-        )
+        if input('Create desktop and icon files (edocuments.desktop and '
+                'edocuments.png in ~/.local/share/applications)?\n') in ['y', 'Y']:
+            if not Path(os.path.expanduser(
+                        '~/.local/share/applications')).exists():
+                os.makedirs(os.path.expanduser('~/.local/share/applications'))
+            ressource_dir = os.path.join(os.path.dirname(
+                os.path.abspath(__file__)), 'ressources')
+            shutil.copyfile(
+                os.path.join(ressource_dir, 'edocuments.desktop'),
+                os.path.expanduser(
+                    '~/.local/share/applications/edocuments.desktop')
+            )
+            shutil.copyfile(
+                os.path.join(ressource_dir, 'edocuments.png'),
+                os.path.expanduser('~/.local/share/applications/edocuments.png')
+            )
         config = mako_template(
             os.path.join(ressource_dir, 'config.yaml'),
             lang=options.lang3

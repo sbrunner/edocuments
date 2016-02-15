@@ -4,16 +4,15 @@ import sys
 import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
+from PyQt5.QtCore import QObject, pyqtSignal
 import edocuments
 from edocuments.process import Process
 from edocuments.index import index
 
 
-class Backend:
+class Backend(QObject):
+    update_library_progress = pyqtSignal(int, str)
     process = Process()
-
-    def __init__(self):
-        pass
 
     def do_scan(self):
         cmds = self.ui.scan_type.currentData().get("cmds")
@@ -64,7 +63,7 @@ class Backend:
                     "*." + conv.get('extension')):
                 if index().get_nb(str(filename)) == 0:
                     todo.append((str(filename), cmds))
-                    self.update_update_library_progress.emit(
+                    self.update_library_progress.emit(
                         0, 'Browsing the files (%i)...' % len(todo))
 
         nb = len(todo)
@@ -78,11 +77,11 @@ class Backend:
         nb_error = 0
         no = 0
 
-        self.update_update_library_progress.emit(
+        self.update_library_progress.emit(
             0, 'Parsing the files %i/%i.' % (no, nb))
         for filename, text in results:
             no += 1
-            self.update_update_library_progress.emit(
+            self.update_library_progress.emit(
                 no * 100 / nb, 'Parsing the files %i/%i.' % (no, nb))
             print("%i/%i" % (no, nb))
 

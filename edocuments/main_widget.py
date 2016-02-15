@@ -5,7 +5,6 @@ import re
 import pathlib
 from threading import Thread
 from subprocess import call
-from pathlib import Path
 from PyQt5.Qt import Qt
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, \
@@ -20,7 +19,6 @@ from edocuments.label_dialog import Dialog
 class MainWindow(QMainWindow):
     scan_end = pyqtSignal(str)
     scan_error = pyqtSignal(str)
-    update_update_library_progress = pyqtSignal(int, str)
 
     def __init__(self):
         super().__init__()
@@ -48,7 +46,7 @@ class MainWindow(QMainWindow):
 
         self.scan_end.connect(self.end_scan)
         self.scan_error.connect(self.on_scan_error)
-        self.update_update_library_progress.connect(
+        self.backend.update_library_progress.connect(
             self.on_update_update_library_progress)
 
         self.ui.search_text.textChanged.connect(self.search)
