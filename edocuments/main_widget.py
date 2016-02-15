@@ -6,7 +6,6 @@ import pathlib
 from threading import Thread
 from subprocess import call
 from PyQt5.Qt import Qt
-from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, \
     QErrorMessage, QMessageBox, QProgressDialog, QListWidgetItem
 import edocuments
@@ -17,9 +16,6 @@ from edocuments.label_dialog import Dialog
 
 
 class MainWindow(QMainWindow):
-    scan_end = pyqtSignal(str)
-    scan_error = pyqtSignal(str)
-
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
@@ -44,8 +40,8 @@ class MainWindow(QMainWindow):
 
         self.image_dialog = Dialog()
 
-        self.scan_end.connect(self.end_scan)
-        self.scan_error.connect(self.on_scan_error)
+        self.backend.scan_end.connect(self.end_scan)
+        self.backend.scan_error.connect(self.on_scan_error)
         self.backend.update_library_progress.connect(
             self.on_update_update_library_progress)
 
@@ -151,7 +147,14 @@ class MainWindow(QMainWindow):
         self.progress.setWindowModality(Qt.WindowModal)
         self.progress.show()
 
-        t = Thread(target=self.backend.do_scan)
+        t = Thread(
+            target=self.backend.do_scan,
+            args=[
+                self.filename(),
+                self.ui.scan_type.currentData().get("cmds"),
+                self.ui.scan_type.currentData().get("postprocess", []),
+            ],
+        )
         t.start()
 
     def on_progress(self, no, name, cmd_cmd, cmd):
@@ -174,6 +177,7 @@ class MainWindow(QMainWindow):
             lambda m: ' ' + str(int(m.group(1)) + 1),
             self.ui.scan_to.text()
         ))
+        self.statusBar().showMessage('')
 
     def on_scan_error(self, error):
         print('Error: %s' % error)

@@ -12,13 +12,14 @@ from edocuments.index import index
 
 class Backend(QObject):
     update_library_progress = pyqtSignal(int, str)
+    scan_end = pyqtSignal(str)
+    scan_error = pyqtSignal(str)
     process = Process()
 
-    def do_scan(self):
-        cmds = self.ui.scan_type.currentData().get("cmds")
+    def do_scan(self, filename, cmds, postprocess):
         try:
             filename, extension = self.process.process(
-                cmds, destination_filename=self.filename(),
+                cmds, destination_filename=filename,
             )
         except:
             self.scan_error.emit(str(sys.exc_info()[0]))
@@ -29,10 +30,9 @@ class Backend(QObject):
 
         self.scan_end.emit(filename)
 
-        cmds = self.ui.scan_type.currentData().get("postprocess", [])
         try:
             filename, extension = self.process.process(
-                cmds, filename=filename,
+                postprocess, filename=filename,
                 destination_filename=self.filename(),
                 in_extention=extension,
             )
