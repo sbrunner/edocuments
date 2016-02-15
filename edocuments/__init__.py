@@ -125,8 +125,10 @@ def cmd_main():
             exit('Works only on Debian base OS')
 
     if options.install:
-        if input('Create desktop and icon files (edocuments.desktop and '
-                'edocuments.png in ~/.local/share/applications)?\n') in ['y', 'Y']:
+        if input(
+            'Create desktop and icon files (edocuments.desktop and '
+            'edocuments.png in ~/.local/share/applications)?\n'
+        ) in ['y', 'Y']:
             if not Path(os.path.expanduser(
                         '~/.local/share/applications')).exists():
                 os.makedirs(os.path.expanduser('~/.local/share/applications'))
@@ -139,22 +141,35 @@ def cmd_main():
             )
             shutil.copyfile(
                 os.path.join(ressource_dir, 'edocuments.png'),
-                os.path.expanduser('~/.local/share/applications/edocuments.png')
+                os.path.expanduser(
+                    '~/.local/share/applications/edocuments.png')
             )
-        config = mako_template(
-            os.path.join(ressource_dir, 'config.yaml'),
-            lang=options.lang3
-        )
-        with open(
-            os.path.expanduser('~/.config/edocuments.yaml'), 'w'
-        ) as file_open:
-            file_open.write(config)
+        if input(
+            'Create the basic configuration '
+            '(~/.config/edocuments.yaml)?\n'
+        ) in ['y', 'Y']:
+            config = mako_template(
+                os.path.join(ressource_dir, 'config.yaml'),
+                lang=options.lang3
+            )
+            with open(
+                os.path.expanduser('~/.config/edocuments.yaml'), 'w'
+            ) as file_open:
+                file_open.write(config)
+
         if Path('/usr/bin/apt-get').exists():
-            subprocess.check_call([
-                'sudo', 'apt-get', 'install',
+            packages = [
                 'python3-pyqt5', 'sane-utils', 'imagemagick',
                 'tesseract-ocr', 'tesseract-ocr-' + options.lang3,
-                'optipng'])
+                'optipng',
+            ]
+            if input(
+                'Install the requires packages (i%s)' %
+                ', '.join(packages)
+            ) in ['y', 'Y']:
+                subprocess.check_call([
+                    'sudo', 'apt-get', 'install',
+                ] + packages)
         else:
             print(
                 'WARNING: the package installation works only on Debian '
