@@ -33,7 +33,6 @@ class Backend(QObject):
         try:
             filename, extension = self.process.process(
                 postprocess, filename=filename,
-                destination_filename=self.filename(),
                 in_extention=extension,
             )
             conv = [
