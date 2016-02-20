@@ -6,14 +6,12 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
-from threading import Thread
 from multiprocessing import Pool
 from yaml import load
 from argparse import ArgumentParser
 from bottle import mako_template
-from autoupgrade import AutoUpgrade
 from PyQt5.QtCore import QSettings
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtWidgets import QApplication
 
 from edocuments.main_widget import MainWindow
 
@@ -64,28 +62,11 @@ def gui_main():
     if settings.value("state") is not None:
         main_window.restoreState(settings.value("state"))
 
-    t = Thread(target=autoupgrade)
-    t.start()
-
     main_window.show()
     app.exec()
     settings.setValue("geometry", main_window.saveGeometry())
     settings.setValue("state", main_window.saveState())
     settings.sync()
-
-
-def autoupgrade():
-    au = AutoUpgrade('edocuments')
-    if au.check():
-        msg = QMessageBox(main_window)
-        msg.setWindowTitle("eDocuments - Upgrade")
-        msg.setText("A new version is available")
-        msg.setInformativeText("Do you want to do anupdate and restart?")
-        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        ret = msg.exec()
-        if ret == QMessageBox.Yes:
-            au.upgrade(dependencies=True)
-            au.restart()
 
 
 def cmd_main():

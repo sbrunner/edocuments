@@ -22,7 +22,6 @@ Search in your library:
 
 install_requires = [
     'PyYAML',
-    'autoupgrade',
     'bottle',
     'Mako',
 ]
