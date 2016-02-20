@@ -4,6 +4,7 @@ import sys
 import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from PyQt5.QtCore import QObject, pyqtSignal
 import edocuments
 from edocuments.process import Process
@@ -58,8 +59,10 @@ class Backend(QObject):
     def do_update_library(self):
         todo = []
         reader = index().index.reader()
-        docs_to_rm = [num for num, doc in reader.iter_docs()
-            if not Path(edocuments.long_path(doc['path'])).exists()]
+        docs_to_rm = [
+            num for num, doc in reader.iter_docs()
+            if not Path(edocuments.long_path(doc['path'])).exists()
+        ]
         reader.close()
 
         for conv in edocuments.config.get('to_txt'):
@@ -73,33 +76,42 @@ class Backend(QObject):
 
         nb = len(todo)
 
-        results = edocuments.pool.imap_unordered(self.to_txt, todo)
+        with ThreadPoolExecutor(
+            max_workers=edocuments.config.get('nb_process', 8)
+        ) as executor:
+            interval = timedelta(
+                seconds=edocuments.config.get('save_interval', 60))
+            last_save = datetime.now()
 
-        interval = timedelta(
-            seconds=edocuments.config.get('save_interval', 60))
-        last_save = datetime.now()
+            nb_error = 0
+            no = 0
 
-        nb_error = 0
-        no = 0
+            for num in docs_to_rm:
+                index().writer().delete_document(num)
 
-        for num in docs_to_rm:
-            index().writer().delete_document(num)
-        self.update_library_progress.emit(
-            0, 'Parsing the files %i/%i.' % (no, nb))
-        for filename, text in results:
-            no += 1
             self.update_library_progress.emit(
-                no * 100 / nb, 'Parsing the files %i/%i.' % (no, nb))
-            print("%i/%i" % (no, nb))
+                0, 'Parsing the files %i/%i.' % (no, nb))
 
-            if text is False:
-                nb_error += 1
-            else:
-                index().add(filename, text)
+            future_results = {
+                executor.submit(self.to_txt, t):
+                t for t in todo
+            }
 
-            if datetime.now() - last_save > interval:
-                index().save()
-                last_save = datetime.now()
+            for feature in as_completed(future_results):
+                filename, text = future_results[feature]
+                no += 1
+                self.update_library_progress.emit(
+                    no * 100 / nb, 'Parsing the files %i/%i.' % (no, nb))
+                print("%i/%i" % (no, nb))
+
+                if text is False:
+                    nb_error += 1
+                else:
+                    index().add(filename, text)
+
+                if datetime.now() - last_save > interval:
+                    index().save()
+                    last_save = datetime.now()
 
         index().save()
 

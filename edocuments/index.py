@@ -10,6 +10,7 @@ import edocuments
 
 
 class Index:
+    _writer = None
 
     def __init__(self):
         self.directory = os.path.join(edocuments.root_folder, '.index')
