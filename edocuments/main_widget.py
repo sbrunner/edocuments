@@ -145,6 +145,7 @@ class MainWindow(QMainWindow):
             "Scanning...", "Cancel", 0, len(cmds), self)
         self.progress.setWindowTitle("Scanning...")
         self.progress.setWindowModality(Qt.WindowModal)
+        self.progress.setLabelText('Scanning...')
         self.progress.show()
 
         t = Thread(
