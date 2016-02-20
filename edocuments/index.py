@@ -28,7 +28,6 @@ class Index:
             self.index = create_in(self.directory, schema)
         else:
             self.index = open_dir(self.directory)
-        self.writer = self.index.writer()
 
     def get_nb(self, filename):
         filename = edocuments.short_path(filename)
@@ -41,18 +40,24 @@ class Index:
         date = Path(filename).stat().st_mtime
         filename = edocuments.short_path(filename)
         if self.get_nb(filename) == 0:
-            self.writer.add_document(
+            self.writer().add_document(
                 path_id=filename,
                 path=filename,
                 content="%s\n%s" % (filename, text),
                 date=date)
             self.dirty = True
 
+    def writer(self):
+        if self._writer is None:
+            self._writer = self.index.writer()
+        return self._writer
+
     def save(self):
         if self.dirty:
             print('Saving index.')
             self.writer.commit(optimize=True)
-            self.writer = self.index.writer()
+            self.writer.close()
+            self.writer = None
 
     def search(self, text):
         with self.index.searcher() as searcher:

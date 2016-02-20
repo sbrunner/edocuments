@@ -47,6 +47,7 @@ class Backend(QObject):
                         cmds, filename=filename, get_content=True,
                     )
                     index().add(filename, text)
+                    index().save()
                 except:
                     self.scan_error.emit(str(sys.exc_info()[0]))
                     raise
@@ -56,6 +57,11 @@ class Backend(QObject):
 
     def do_update_library(self):
         todo = []
+        reader = index().index.reader()
+        docs_to_rm = [num for num, doc in reader.iter_docs()
+            if not Path(edocuments.long_path(doc['path'])).exists()]
+        reader.close()
+
         for conv in edocuments.config.get('to_txt'):
             cmds = conv.get("cmds")
             for filename in Path(edocuments.root_folder).rglob(
@@ -76,6 +82,8 @@ class Backend(QObject):
         nb_error = 0
         no = 0
 
+        for num in docs_to_rm:
+            index().writer().delete_document(num)
         self.update_library_progress.emit(
             0, 'Parsing the files %i/%i.' % (no, nb))
         for filename, text in results:
