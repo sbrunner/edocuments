@@ -24,6 +24,7 @@ install_requires = [
     'PyYAML',
     'bottle',
     'Mako',
+    'Whoosh',
 ]
 
 setup_requires = [
