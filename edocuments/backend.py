@@ -2,7 +2,6 @@
 
 import sys
 import traceback
-from datetime import datetime, timedelta
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from PyQt5.QtCore import QObject, pyqtSignal
@@ -58,12 +57,11 @@ class Backend(QObject):
 
     def do_update_library(self):
         todo = []
-        reader = index().index.reader()
-        docs_to_rm = [
-            num for num, doc in reader.iter_docs()
-            if not Path(edocuments.long_path(doc['path'])).exists()
-        ]
-        reader.close()
+        with index().index.reader() as reader:
+            docs_to_rm = [
+                num for num, doc in reader.iter_docs()
+                if not Path(edocuments.long_path(doc['path'])).exists()
+            ]
 
         for conv in edocuments.config.get('to_txt'):
             cmds = conv.get("cmds")
@@ -79,15 +77,12 @@ class Backend(QObject):
         with ThreadPoolExecutor(
             max_workers=edocuments.config.get('nb_process', 8)
         ) as executor:
-            interval = timedelta(
-                seconds=edocuments.config.get('save_interval', 60))
-            last_save = datetime.now()
-
             nb_error = 0
             no = 0
 
-            for num in docs_to_rm:
-                index().writer().delete_document(num)
+            with index().index.writer() as writer:
+                for num in docs_to_rm:
+                    writer.delete_document(num)
 
             self.update_library_progress.emit(
                 0, 'Parsing the files %i/%i.' % (no, nb))
@@ -109,11 +104,7 @@ class Backend(QObject):
                 else:
                     index().add(filename, text)
 
-                if datetime.now() - last_save > interval:
-                    index().save()
-                    last_save = datetime.now()
-
-        index().save()
+        index().optimize()
 
         if nb_error != 0:
             self.scan_error.emit("Finished with %i errors" % nb_error)

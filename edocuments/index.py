@@ -6,11 +6,11 @@ from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, ID, TEXT, STORED
 from whoosh.qparser import QueryParser
 from whoosh.query import Term
+from whoosh import writing
 import edocuments
 
 
 class Index:
-    _writer = None
 
     def __init__(self):
         self.directory = os.path.join(edocuments.root_folder, '.index')
@@ -29,36 +29,27 @@ class Index:
             self.index = create_in(self.directory, schema)
         else:
             self.index = open_dir(self.directory)
+# http://whoosh.readthedocs.org/en/latest/schema.html#modifying-the-schema-after-indexing
 
     def get_nb(self, filename):
         filename = edocuments.short_path(filename)
         with self.index.searcher() as searcher:
             return len(searcher.search(Term("path_id", filename)))
 
-# TODO: update
-# http://pythonhosted.org//Whoosh/indexing.html#updating-documents
     def add(self, filename, text):
         date = Path(filename).stat().st_mtime
         filename = edocuments.short_path(filename)
-        if self.get_nb(filename) == 0:
-            self.writer().add_document(
+        with self.index.writer() as writer:
+            writer.update_document(
                 path_id=filename,
                 path=filename,
                 content="%s\n%s" % (filename, text),
                 date=date)
-            self.dirty = True
 
-    def writer(self):
-        if self._writer is None:
-            self._writer = self.index.writer()
-        return self._writer
-
-    def save(self):
-        if self.dirty:
-            print('Saving index.')
-            self.writer.commit(optimize=True)
-            self.writer.close()
-            self.writer = None
+    def optimize(self):
+        self.index.optimize()
+        with self.index.writer() as writer:
+            writer.mergetype = writing.CLEAR
 
     def search(self, text):
         with self.index.searcher() as searcher:
@@ -71,7 +62,6 @@ class Index:
                     'path' if 'path_in' in r.matched_terms() else 'content'
                 ),
             } for r in results]
-
 
 _index = None
 
