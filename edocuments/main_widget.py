@@ -102,9 +102,10 @@ class MainWindow(QMainWindow):
         t = Thread(target=self.backend.do_update_library)
         t.start()
 
-    def on_update_update_library_progress(self, pos, text):
+    def on_update_update_library_progress(self, pos, text, status):
         self.update_library_progress.setValue(pos)
         self.update_library_progress.setLabelText(text)
+        self.statusBar().showMessage(status)
 
     def filename(self):
         return edocuments.long_path(self.ui.scan_to.text())

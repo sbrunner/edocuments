@@ -17,18 +17,34 @@ class Index:
         self.dirty = False
         schema = Schema(
             path_id=ID(stored=True, unique=True),
-            path=TEXT(stored=True),
             content=TEXT(stored=True),
-            date=STORED
+            date=STORED,
+            directory=STORED,
         )
         self.parser_path = QueryParser("path_id", schema)
         self.parser_content = QueryParser("content", schema)
 
-        if not os.path.exists(self.directory):
+        if not exists_in(self.directory):
             os.makedirs(self.directory)
             self.index = create_in(self.directory, schema)
         else:
             self.index = open_dir(self.directory)
+            if 'path' in self.index.schema.names():
+                with self.index.writer() as writer:
+                    writer.remove_field('path')
+            if 'directory' not in self.index.schema.names():
+                with self.index.writer() as writer:
+                    writer.add_field('directory', STORED)
+            print(
+                'Field length:\npath: %i\ncontent: %i\ndate: %i\n'
+                'directory: %i' % (
+                    self.index.field_length("path_id"),
+                    self.index.field_length("content"),
+                    self.index.field_length("date"),
+                    self.index.field_length("directory"),
+                )
+            )
+
 # http://whoosh.readthedocs.org/en/latest/schema.html#modifying-the-schema-after-indexing
 
     def get_date(self, filename):
@@ -46,9 +62,10 @@ class Index:
         with self.index.writer() as writer:
             writer.update_document(
                 path_id=filename,
-                path=filename,
                 content="%s\n%s" % (filename, text),
-                date=date)
+                date=date,
+                directory=False,
+            )
 
     def optimize(self):
         self.index.optimize()
@@ -60,8 +77,9 @@ class Index:
             query = self.parser_content.parse(text)
             results = searcher.search(query, terms=True, limit=200)
             return [{
-                'path': r.get('path'),
+                'path': r.get('path_id'),
                 'content': r.get('content'),
+                'directory': r.get('directory'),
                 'highlight': r.highlights(
                     'path' if 'path_in' in r.matched_terms() else 'content'
                 ),
