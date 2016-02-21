@@ -60,7 +60,7 @@ class Backend(QObject):
         with index().index.reader() as reader:
             docs_to_rm = [
                 num for num, doc in reader.iter_docs()
-                if not Path(edocuments.long_path(doc['path'])).exists()
+                if not Path(edocuments.long_path(doc['path_id'])).exists()
             ]
 
         self.update_library_progress.emit(
