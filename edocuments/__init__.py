@@ -33,6 +33,7 @@ pool = None
 
 def short_path(filename):
     global root_folder
+    filename = str(filename)
     if filename[:len(root_folder)] == root_folder:
         return filename[len(root_folder):]
     return filename

@@ -67,7 +67,9 @@ class Backend(QObject):
             cmds = conv.get("cmds")
             for filename in Path(edocuments.root_folder).rglob(
                     "*." + conv.get('extension')):
-                if index().get_nb(str(filename)) == 0:
+                current_date = index().get_date(filename)
+                new_date = filename.stat().st_mtime
+                if current_date is None or current_date < new_date:
                     todo.append((str(filename), cmds))
                     self.update_library_progress.emit(
                         0, 'Browsing the files (%i)...' % len(todo))
@@ -80,6 +82,7 @@ class Backend(QObject):
             nb_error = 0
             no = 0
 
+            print('Removes %i old documents.' % len(docs_to_rm))
             with index().index.writer() as writer:
                 for num in docs_to_rm:
                     writer.delete_document(num)

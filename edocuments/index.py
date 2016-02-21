@@ -31,10 +31,14 @@ class Index:
             self.index = open_dir(self.directory)
 # http://whoosh.readthedocs.org/en/latest/schema.html#modifying-the-schema-after-indexing
 
-    def get_nb(self, filename):
+    def get_date(self, filename):
         filename = edocuments.short_path(filename)
         with self.index.searcher() as searcher:
-            return len(searcher.search(Term("path_id", filename)))
+            results = searcher.search(Term("path_id", filename))
+            if len(results) == 0:
+                return None
+            assert(len(results) == 1)
+            return results[0].get('date')
 
     def add(self, filename, text):
         date = Path(filename).stat().st_mtime
