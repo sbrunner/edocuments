@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from whoosh.index import create_in, open_dir
+from whoosh.index import create_in, open_dir, exists_in
 from whoosh.fields import Schema, ID, TEXT, STORED
 from whoosh.qparser import QueryParser
 from whoosh.query import Term

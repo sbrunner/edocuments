@@ -11,7 +11,7 @@ from edocuments.index import index
 
 
 class Backend(QObject):
-    update_library_progress = pyqtSignal(int, str)
+    update_library_progress = pyqtSignal(int, str, str)
     scan_end = pyqtSignal(str)
     scan_error = pyqtSignal(str)
     process = Process()
@@ -63,6 +63,20 @@ class Backend(QObject):
                 if not Path(edocuments.long_path(doc['path'])).exists()
             ]
 
+        self.update_library_progress.emit(
+            0, 'Adding the directories...', '')
+        with index().index.writer() as writer:
+            for directory in Path(edocuments.root_folder).rglob('*'):
+                if \
+                        directory.is_dir() and \
+                        index().get_date(directory) is None:
+                    writer.add_document(
+                        path_id=str(directory),
+                        content=str(directory),
+                        date=directory.stat().st_mtime,
+                        directory=True,
+                    )
+
         for conv in edocuments.config.get('to_txt'):
             cmds = conv.get("cmds")
             for filename in Path(edocuments.root_folder).rglob(
@@ -72,7 +86,7 @@ class Backend(QObject):
                 if current_date is None or current_date < new_date:
                     todo.append((str(filename), cmds))
                     self.update_library_progress.emit(
-                        0, 'Browsing the files (%i)...' % len(todo))
+                        0, 'Browsing the files (%i)...' % len(todo), '')
 
         nb = len(todo)
 
@@ -88,7 +102,8 @@ class Backend(QObject):
                     writer.delete_document(num)
 
             self.update_library_progress.emit(
-                0, 'Parsing the files %i/%i.' % (no, nb))
+                0, 'Parsing the files %i/%i.' % (no, nb), '',
+            )
 
             future_results = {
                 executor.submit(self.to_txt, t):
@@ -99,7 +114,9 @@ class Backend(QObject):
                 filename, text = future_results[feature]
                 no += 1
                 self.update_library_progress.emit(
-                    no * 100 / nb, 'Parsing the files %i/%i.' % (no, nb))
+                    no * 100 / nb, 'Parsing the files %i/%i.' % (no, nb),
+                    edocuments.short_path(filename),
+                )
                 print("%i/%i" % (no, nb))
 
                 if text is False:
@@ -111,6 +128,10 @@ class Backend(QObject):
 
         if nb_error != 0:
             self.scan_error.emit("Finished with %i errors" % nb_error)
+        else:
+            self.update_library_progress.emit(
+                100, 'Finish', '',
+            )
 
     def to_txt(self, job):
         filename, cmds = job
