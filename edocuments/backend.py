@@ -82,29 +82,38 @@ class Backend(QObject):
             for filename in Path(edocuments.root_folder).rglob(
                     "*." + conv.get('extension')):
                 current_date = index().get_date(filename)
+                print(type(current_date))
+                print(current_date)
                 new_date = filename.stat().st_mtime
                 if current_date is None or current_date < new_date:
+                    if current_date is not None:
+                        print(current_date)
+                        print(new_date)
+                        exit()
                     todo.append((str(filename), cmds))
                     self.update_library_progress.emit(
                         0, 'Browsing the files (%i)...' % len(todo), '')
 
         nb = len(todo)
 
+        nb_error = 0
+        no = 0
+
+        print('Removes %i old documents.' % len(docs_to_rm))
+
+        with index().index.writer() as writer:
+            for num in docs_to_rm:
+                writer.delete_document(num)
+
+        self.update_library_progress.emit(
+            0, 'Parsing the files %i/%i.' % (no, nb), '',
+        )
+
+        exit()
+
         with ThreadPoolExecutor(
             max_workers=edocuments.config.get('nb_process', 8)
         ) as executor:
-            nb_error = 0
-            no = 0
-
-            print('Removes %i old documents.' % len(docs_to_rm))
-            with index().index.writer() as writer:
-                for num in docs_to_rm:
-                    writer.delete_document(num)
-
-            self.update_library_progress.emit(
-                0, 'Parsing the files %i/%i.' % (no, nb), '',
-            )
-
             future_results = {
                 executor.submit(self.to_txt, t):
                 t for t in todo
