@@ -54,6 +54,7 @@ class Index:
             if len(results) == 0:
                 return None
             assert(len(results) == 1)
+            assert(results[0].get('date') is not None)
             return results[0].get('date')
 
     def add(self, filename, text):

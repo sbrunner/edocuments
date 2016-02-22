@@ -47,7 +47,6 @@ class Backend(QObject):
                         cmds, filename=filename, get_content=True,
                     )
                     index().add(filename, text)
-                    index().save()
                 except:
                     self.scan_error.emit(str(sys.exc_info()[0]))
                     raise
@@ -56,12 +55,12 @@ class Backend(QObject):
             raise
 
     def do_update_library(self):
-        todo = []
+        docs_to_rm = []
         with index().index.reader() as reader:
-            docs_to_rm = [
-                num for num, doc in reader.iter_docs()
-                if not Path(edocuments.long_path(doc['path_id'])).exists()
-            ]
+            for num, doc in reader.iter_docs():
+                if not Path(edocuments.long_path(doc['path_id'])).exists():
+                    print("Delete document: " + doc['path_id'])
+                    docs_to_rm.append(num)
 
         self.update_library_progress.emit(
             0, 'Adding the directories...', '')
@@ -77,25 +76,19 @@ class Backend(QObject):
                         directory=True,
                     )
 
+        todo = []
         for conv in edocuments.config.get('to_txt'):
             cmds = conv.get("cmds")
             for filename in Path(edocuments.root_folder).rglob(
                     "*." + conv.get('extension')):
                 current_date = index().get_date(filename)
-                print(type(current_date))
-                print(current_date)
                 new_date = filename.stat().st_mtime
                 if current_date is None or current_date < new_date:
-                    if current_date is not None:
-                        print(current_date)
-                        print(new_date)
-                        exit()
                     todo.append((str(filename), cmds))
                     self.update_library_progress.emit(
-                        0, 'Browsing the files (%i)...' % len(todo), '')
+                        0, 'Browsing the files (%i)...' % len(todo), str(filename))
 
         nb = len(todo)
-
         nb_error = 0
         no = 0
 
@@ -108,8 +101,6 @@ class Backend(QObject):
         self.update_library_progress.emit(
             0, 'Parsing the files %i/%i.' % (no, nb), '',
         )
-
-        exit()
 
         with ThreadPoolExecutor(
             max_workers=edocuments.config.get('nb_process', 8)
