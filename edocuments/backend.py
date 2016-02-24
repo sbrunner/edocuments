@@ -84,7 +84,6 @@ class Backend(QObject):
                         break
                 if not ignore:
                     with index().index.writer() as writer:
-                        writer.merge = False
                         writer.update_document(
                             path_id=str(directory),
                             content=str(directory),
@@ -92,6 +91,8 @@ class Backend(QObject):
                             directory=True,
                         )
 
+        self.update_library_progress.emit(
+            0, 'Browsing the files (0)...', '')
         index_folder += '/'
         todo = []
         for conv in edocuments.config.get('to_txt'):
@@ -118,7 +119,6 @@ class Backend(QObject):
         print('Removes %i old documents.' % len(docs_to_rm))
 
         with index().index.writer() as writer:
-            writer.merge = False
             for num in docs_to_rm:
                 writer.delete_document(num)
 
@@ -136,6 +136,9 @@ class Backend(QObject):
             for feature in as_completed(future_results):
                 pass
 
+        self.update_library_progress.emit(
+            0, 'Optimise the index...', '',
+        )
         index().optimize()
 
         if self.nb_error != 0:

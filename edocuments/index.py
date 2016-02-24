@@ -61,7 +61,6 @@ class Index:
         date = Path(filename).stat().st_mtime
         filename = edocuments.short_path(filename)
         with self.index.writer() as writer:
-            writer.merge = False
             writer.update_document(
                 path_id=filename,
                 content="%s\n%s" % (filename, text),
