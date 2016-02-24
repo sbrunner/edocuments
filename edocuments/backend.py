@@ -62,8 +62,9 @@ class Backend(QObject):
         docs_date = {}
         with index().index.reader() as reader:
             for num, doc in reader.iter_docs():
-                print("Iter doc: " + doc['path_id'])
-                if not Path(edocuments.long_path(doc['path_id'])).exists():
+                if \
+                        doc['path_id'] in docs_date or \
+                        not Path(edocuments.long_path(doc['path_id'])).exists():
                     print("Delete document: " + doc['path_id'])
                     docs_to_rm.append(num)
                 else:
