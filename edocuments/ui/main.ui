@@ -173,7 +173,7 @@
      <x>0</x>
      <y>0</y>
      <width>583</width>
-     <height>24</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuUpdate_library">
@@ -181,6 +181,7 @@
      <string>&amp;Library</string>
     </property>
     <addaction name="library_update"/>
+    <addaction name="library_optimize"/>
     <addaction name="library_reset"/>
    </widget>
    <addaction name="menuUpdate_library"/>
@@ -194,6 +195,11 @@
   <action name="library_reset">
    <property name="text">
     <string>Reset</string>
+   </property>
+  </action>
+  <action name="library_optimize">
+   <property name="text">
+    <string>Optimise</string>
    </property>
   </action>
  </widget>

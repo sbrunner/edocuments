@@ -4,6 +4,7 @@ import os
 import sys
 import traceback
 from pathlib import Path
+from threading import Lock
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from PyQt5.QtCore import QObject, pyqtSignal
 import edocuments
@@ -16,6 +17,7 @@ class Backend(QObject):
     scan_end = pyqtSignal(str)
     scan_error = pyqtSignal(str)
     process = Process()
+    lock = Lock()
 
     def do_scan(self, filename, cmds, postprocess):
         try:
@@ -57,28 +59,38 @@ class Backend(QObject):
 
     def do_update_library(self):
         docs_to_rm = []
+        docs_date = {}
         with index().index.reader() as reader:
             for num, doc in reader.iter_docs():
+                print("Iter doc: " + doc['path_id'])
                 if not Path(edocuments.long_path(doc['path_id'])).exists():
                     print("Delete document: " + doc['path_id'])
                     docs_to_rm.append(num)
+                else:
+                    docs_date[doc['path_id']] = doc['date']
 
         self.update_library_progress.emit(
             0, 'Adding the directories...', '')
         index_folder = os.path.join(edocuments.root_folder, '.index')
-        with index().index.writer() as writer:
-            for directory in Path(edocuments.root_folder).rglob('*'):
-                if \
-                        str(directory) != index_folder and \
-                        directory.is_dir() and \
-                        index().get_date(directory) is None:
-                    writer.merge = False
-                    writer.add_document(
-                        path_id=str(directory),
-                        content=str(directory),
-                        date=directory.stat().st_mtime,
-                        directory=True,
-                    )
+        for directory in Path(edocuments.root_folder).rglob('*'):
+            if \
+                    str(directory) not in docs_date and \
+                    directory.is_dir() and \
+                    str(directory) != index_folder:
+                ignore = False
+                for ignore_pattern in edocuments.config.get('ignore', []):
+                    if directory.match(ignore_pattern):
+                        ignore = False
+                        break
+                if not ignore:
+                    with index().index.writer() as writer:
+                        writer.merge = False
+                        writer.update_document(
+                            path_id=str(directory),
+                            content=str(directory),
+                            date=directory.stat().st_mtime,
+                            directory=True,
+                        )
 
         index_folder += '/'
         todo = []
@@ -86,17 +98,22 @@ class Backend(QObject):
             cmds = conv.get("cmds")
             for filename in Path(edocuments.root_folder).rglob(
                     "*." + conv.get('extension')):
-                if str(filename).find(index_folder) != 0:
-                    current_date = index().get_date(filename)
+                ignore = False
+                for ignore_pattern in edocuments.config.get('ignore', []):
+                    if directory.match(ignore_pattern):
+                        ignore = False
+                        break
+                if not ignore and filename.exists() and str(filename).find(index_folder) != 0:
+                    current_date = docs_date.get(edocuments.short_path(filename))
                     new_date = filename.stat().st_mtime
                     if current_date is None or current_date < new_date:
                         todo.append((str(filename), cmds))
                         self.update_library_progress.emit(
                             0, 'Browsing the files (%i)...' % len(todo), str(filename))
 
-        nb = len(todo)
-        nb_error = 0
-        no = 0
+        self.nb = len(todo)
+        self.nb_error = 0
+        self.no = 0
 
         print('Removes %i old documents.' % len(docs_to_rm))
 
@@ -106,7 +123,7 @@ class Backend(QObject):
                 writer.delete_document(num)
 
         self.update_library_progress.emit(
-            0, 'Parsing the files %i/%i.' % (no, nb), '',
+            0, 'Parsing the files %i/%i.' % (self.no, self.nb), '',
         )
 
         with ThreadPoolExecutor(
@@ -116,25 +133,13 @@ class Backend(QObject):
                 executor.submit(self.to_txt, t):
                 t for t in todo
             }
-
             for feature in as_completed(future_results):
-                filename, text = feature.result()
-                no += 1
-                self.update_library_progress.emit(
-                    no * 100 / nb, 'Parsing the files %i/%i.' % (no, nb),
-                    edocuments.short_path(filename),
-                )
-                print("%i/%i" % (no, nb))
-
-                if text is False:
-                    nb_error += 1
-                else:
-                    index().add(filename, text)
+                pass
 
         index().optimize()
 
-        if nb_error != 0:
-            self.scan_error.emit("Finished with %i errors" % nb_error)
+        if self.nb_error != 0:
+            self.scan_error.emit("Finished with %i errors" % self.nb_error)
         else:
             self.update_library_progress.emit(
                 100, 'Finish', '',
@@ -148,7 +153,26 @@ class Backend(QObject):
             )
             if text is None:
                 text = ''
-            return filename, text
+
+            self.lock.acquire()
+
+            self.no += 1
+            self.update_library_progress.emit(
+                self.no * 100 / self.nb, 'Parsing the files %i/%i.' % (self.no, self.nb),
+                edocuments.short_path(filename),
+            )
+            print("%i/%i" % (self.no, self.nb))
+
+            if text is False:
+                print("Error with document: " + filename)
+                self.nb_error += 1
+            else:
+                index().add(filename, text)
+
+            self.lock.release()
         except:
             traceback.print_exc()
             return filename, False
+
+    def optimize_library(self):
+        index().optimize()

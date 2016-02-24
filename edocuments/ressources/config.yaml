@@ -2,6 +2,10 @@
 root_folder: "~/Documents"
 nb_process: 8
 
+ignore:
+    - '*_fichiers/*'
+    - '*_files/*'
+
 scan_comments: |
     Recomanded file names:
     * <subject> - <date> - <page number>

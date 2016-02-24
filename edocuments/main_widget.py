@@ -50,6 +50,7 @@ class MainWindow(QMainWindow):
             self.selection_change)
 
         self.ui.library_update.triggered.connect(self.update_library)
+        self.ui.library_optimize.triggered.connect(self.backend.optimize_library)
         self.backend.process.progress.connect(self.on_progress)
 
     def open_selected(self):
