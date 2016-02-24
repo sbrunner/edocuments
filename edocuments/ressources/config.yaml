@@ -44,6 +44,21 @@ to_txt:
   - extension: txt
     cmds:
     - cp
+  - extension: csv
+    cmds:
+    - cp
+  - extension: odt
+    cmds:
+    - odt2txt
+  - extension: ods
+    cmds:
+    - ods2txt
+  - extension: ods
+    cmds:
+    - ods2txt
+  - extension: docx
+    cmds:
+    - docx2txt
 
 open_cmd: gnome-open
 
@@ -91,8 +106,23 @@ cmds:
         out_ext: txt
 
     pdf2txt:
-        display: Optical character recognition.
+        display: Convert PDF to text.
         cmd: "pdftotext {in} {out}"
+        out_ext: txt
+
+    odt2txt:
+        display: Convert OpenDocument to text.
+        cmd: "odt2text {in} {out}"
+        out_ext: txt
+
+    ods2txt:
+        display: Convert OpenDocument to text.
+        cmd: "ods2text {in} {out}"
+        out_ext: txt
+
+    docx2txt:
+        display: Convert Docx to text.
+        cmd: "docx2text {in} {out}"
         out_ext: txt
 
     cp:

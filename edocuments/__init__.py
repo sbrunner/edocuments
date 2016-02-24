@@ -141,14 +141,16 @@ def cmd_main():
 
         if Path('/usr/bin/apt-get').exists():
             installed_packages = []
-            for line in str(subprocess.check_output(['dpkg', '-l'])).split(r'\n'):
+            for line in str(subprocess.check_output(['dpkg', '-l'])) \
+                    .split(r'\n'):
                 if line.find('ii ') == 0:
                     installed_packages.append(re.split(r' +', line)[1])
 
             packages = [p for p in [
                 'python3-pyqt5', 'sane-utils', 'imagemagick',
                 'tesseract-ocr', 'tesseract-ocr-' + options.lang3,
-                'optipng'
+                'optipng', 'poppler-utils', 'odt2txt',
+                'docx2txt',
             ] if p not in installed_packages]
             print(packages)
             if len(packages) != 0:
