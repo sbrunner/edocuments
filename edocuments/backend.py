@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 import traceback
 from pathlib import Path
@@ -64,11 +65,14 @@ class Backend(QObject):
 
         self.update_library_progress.emit(
             0, 'Adding the directories...', '')
+        index_folder = os.path.join(edocuments.root_folder, '.index')
         with index().index.writer() as writer:
             for directory in Path(edocuments.root_folder).rglob('*'):
                 if \
+                        str(directory) != index_folder and \
                         directory.is_dir() and \
                         index().get_date(directory) is None:
+                    writer.merge = False
                     writer.add_document(
                         path_id=str(directory),
                         content=str(directory),
@@ -76,17 +80,19 @@ class Backend(QObject):
                         directory=True,
                     )
 
+        index_folder += '/'
         todo = []
         for conv in edocuments.config.get('to_txt'):
             cmds = conv.get("cmds")
             for filename in Path(edocuments.root_folder).rglob(
                     "*." + conv.get('extension')):
-                current_date = index().get_date(filename)
-                new_date = filename.stat().st_mtime
-                if current_date is None or current_date < new_date:
-                    todo.append((str(filename), cmds))
-                    self.update_library_progress.emit(
-                        0, 'Browsing the files (%i)...' % len(todo), str(filename))
+                if str(filename).find(index_folder) != 0:
+                    current_date = index().get_date(filename)
+                    new_date = filename.stat().st_mtime
+                    if current_date is None or current_date < new_date:
+                        todo.append((str(filename), cmds))
+                        self.update_library_progress.emit(
+                            0, 'Browsing the files (%i)...' % len(todo), str(filename))
 
         nb = len(todo)
         nb_error = 0
@@ -95,6 +101,7 @@ class Backend(QObject):
         print('Removes %i old documents.' % len(docs_to_rm))
 
         with index().index.writer() as writer:
+            writer.merge = False
             for num in docs_to_rm:
                 writer.delete_document(num)
 
@@ -111,7 +118,7 @@ class Backend(QObject):
             }
 
             for feature in as_completed(future_results):
-                filename, text = future_results[feature]
+                filename, text = feature.result()
                 no += 1
                 self.update_library_progress.emit(
                     no * 100 / nb, 'Parsing the files %i/%i.' % (no, nb),

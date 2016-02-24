@@ -67,7 +67,6 @@ class Process(QObject):
                     raise
 
                 if self.cancel is True:
-                    print(555)
                     return None, None
                 print("{name}: {cmd}".format(name=name, cmd=cmd_cmd))
                 self.progress.emit(no, name, cmd_cmd, cmd)
