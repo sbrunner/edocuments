@@ -140,18 +140,25 @@ def cmd_main():
                 file_open.write(config)
 
         if Path('/usr/bin/apt-get').exists():
-            packages = [
+            installed_packages = []
+            for line in str(subprocess.check_output(['dpkg', '-l'])).split(r'\n'):
+                if line.find('ii ') == 0:
+                    installed_packages.append(re.split(r' +', line)[1])
+
+            packages = [p for p in [
                 'python3-pyqt5', 'sane-utils', 'imagemagick',
                 'tesseract-ocr', 'tesseract-ocr-' + options.lang3,
-                'optipng',
-            ]
-            if input(
-                'Install the requires packages (i%s)' %
-                ', '.join(packages)
-            ) in ['y', 'Y']:
-                subprocess.check_call([
-                    'sudo', 'apt-get', 'install',
-                ] + packages)
+                'optipng'
+            ] if p not in installed_packages]
+            print(packages)
+            if len(packages) != 0:
+                if input(
+                    'Install the requires packages (%s)?\n' %
+                    ', '.join(packages)
+                ) in ['y', 'Y']:
+                    subprocess.check_call([
+                        'sudo', 'apt-get', 'install',
+                    ] + packages)
         else:
             print(
                 'WARNING: the package installation works only on Debian '
