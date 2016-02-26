@@ -79,7 +79,14 @@ class MainWindow(QMainWindow):
     def search(self, text):
         model = self.ui.search_result_list.model()
         model.removeRows(0, model.rowCount())
-        for result in index().search(self.ui.search_text.text()):
+        results = index().search(self.ui.search_text.text())
+        dirs = [r.get('path') for r in results if r.get('directory') is True]
+        results = [
+            r for r in results
+            if os.path.dirname(r.get('path')) not in dirs
+        ]
+
+        for result in results:
             item = QListWidgetItem(result['path'], self.ui.search_result_list)
             item.result = result
 
