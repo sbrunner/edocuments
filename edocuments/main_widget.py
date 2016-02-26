@@ -79,15 +79,26 @@ class MainWindow(QMainWindow):
     def search(self, text):
         model = self.ui.search_result_list.model()
         model.removeRows(0, model.rowCount())
-        results = index().search(self.ui.search_text.text())
-        dirs = [r.get('path') for r in results if r.get('directory') is True]
-        results = [
-            r for r in results
-            if os.path.dirname(r.get('path')) not in dirs
-        ]
+        raw_results = index().search(self.ui.search_text.text())
+        dirs = dict([(r.get('path'), -1) for r in raw_results if r.get('directory')])
+        results = {}
+        for index_, result in enumerate(raw_results):
+            path_ = result.get('path')
+            dir_ = os.path.dirname(path_)
+            if dir_ not in dirs:
+                results[path_] = [result, float(index_) / len(raw_results)]
+            else:
+                dirs[dir_] += 1
 
-        for result in results:
-            item = QListWidgetItem(result['path'], self.ui.search_result_list)
+        for dir_, count in dirs.items():
+            if dir_ in results:
+                results[dir_][1] += count
+
+        results = sorted(results.values(), key=lambda x: -x[1])
+
+        for result, count in results:
+            postfix = ' (%i)' % (count + 1) if result.get('directory') else ''
+            item = QListWidgetItem(result['path'] + postfix, self.ui.search_result_list)
             item.result = result
 
     def scan_browse(self, event):
