@@ -144,6 +144,8 @@ class Backend(QObject):
             0, 'Parsing the files %i/%i.' % (self.no, self.nb), '',
         )
 
+        print('Process %i documents.' % len(todo))
+
         with ThreadPoolExecutor(
             max_workers=edocuments.config.get('nb_process', 8)
         ) as executor:
@@ -167,9 +169,9 @@ class Backend(QObject):
             )
 
     def to_txt(self, job):
-        filename, cmds = job
+        filename, cmds, date, md5 = job
         try:
-            text, extension, date, md5 = Process().process(
+            text, extension = Process().process(
                 cmds, filename=str(filename), get_content=True,
             )
             if text is None:

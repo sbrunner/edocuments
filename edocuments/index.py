@@ -73,7 +73,7 @@ class Index:
         with self.index.writer() as writer:
             writer.update_document(**{
                 PATH: filename,
-                CONSTENT: text,
+                CONTENT: text,
                 DATE: date,
                 DIRECTORY: False,
             })
