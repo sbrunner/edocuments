@@ -6,7 +6,6 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
-from multiprocessing import Pool
 from yaml import load
 from argparse import ArgumentParser
 from bottle import mako_template
@@ -28,7 +27,6 @@ config = {}
 root_folder = None
 settings = None
 main_window = None
-pool = None
 
 
 def short_path(filename):
@@ -47,14 +45,13 @@ def long_path(filename):
 
 
 def gui_main():
-    global config, root_folder, settings, main_window, pool
+    global config, root_folder, settings, main_window
     with open(CONFIG_PATH) as f:
         config = load(f.read())
     root_folder = os.path.expanduser(config.get("root_folder"))
     if root_folder[-1] != '/':
         root_folder += '/'
     settings = QSettings("org", "edocuments")
-    pool = Pool(config.get('nb_process', 8))
 
     app = QApplication(sys.argv)
     main_window = MainWindow()
