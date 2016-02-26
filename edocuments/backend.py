@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import sys
 import hashlib
 import traceback
@@ -65,7 +64,8 @@ class Backend(QObject):
             for num, doc in reader.iter_docs():
                 if \
                         doc[PATH] in docs_date or \
-                        not Path(edocuments.long_path(doc[PATH])).exists():
+                        not Path(edocuments.long_path(doc[PATH])).exists() or \
+                        doc[PATH] != edocuments.short_path(doc[PATH]):
                     print("Delete document: " + doc[PATH])
                     docs_to_rm.append(num)
                 else:
@@ -73,12 +73,13 @@ class Backend(QObject):
 
         self.update_library_progress.emit(
             0, 'Adding the directories...', '')
-        index_folder = os.path.join(edocuments.root_folder, '.index')
+        index_folder = '.index'
         for directory in Path(edocuments.root_folder).rglob('*'):
+            dir_ = edocuments.short_path(directory)
             if \
-                    str(directory) not in docs_date and \
+                    dir_ not in docs_date and \
                     directory.is_dir() and \
-                    str(directory) != index_folder:
+                    directory != index_folder:
                 ignore = False
                 for ignore_pattern in edocuments.config.get('ignore', []):
                     if directory.match(ignore_pattern):
@@ -87,8 +88,8 @@ class Backend(QObject):
                 if not ignore:
                     with index().index.writer() as writer:
                         writer.update_document(**{
-                            PATH: edocuments.short_path(directory),
-                            CONTENT: str(directory),
+                            PATH: dir_,
+                            CONTENT: dir_,
                             DATE: directory.stat().st_mtime,
                             DIRECTORY: True,
                         })
@@ -119,14 +120,15 @@ class Backend(QObject):
                             doc = index().get(filename)
                             index().add(
                                 filename,
-                                doc['content'],
+                                doc[CONTENT],
                                 max(new_date, current_date),
                                 new_md5.hexdigest()
                             )
                         else:
+                            print("Add document: " + edocuments.short_path(filename))
                             todo.append((str(filename), cmds, new_date, new_md5.hexdigest()))
                             self.update_library_progress.emit(
-                                0, 'Browsing the files (%i)...' % len(todo), str(filename))
+                                0, 'Browsing the files (%i)...' % len(todo), edocuments.short_path(filename))
 
         self.nb = len(todo)
         self.nb_error = 0
