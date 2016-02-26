@@ -25,7 +25,8 @@ class Backend(QObject):
                 cmds, destination_filename=filename,
             )
         except:
-            self.scan_error.emit(str(sys.exc_info()[0]))
+            traceback.print_exc()
+            self.scan_error.emit(str(sys.exc_info()[1]))
             raise
 
         if filename is None:
@@ -51,10 +52,12 @@ class Backend(QObject):
                     )
                     index().add(filename, text)
                 except:
-                    self.scan_error.emit(str(sys.exc_info()[0]))
+                    traceback.print_exc()
+                    self.scan_error.emit(str(sys.exc_info()[1]))
                     raise
         except:
-            self.scan_error.emit(str(sys.exc_info()[0]))
+            traceback.print_exc()
+            self.scan_error.emit(str(sys.exc_info()[1]))
             raise
 
     def do_update_library(self):
