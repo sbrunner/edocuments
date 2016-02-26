@@ -5,8 +5,16 @@ from whoosh.index import create_in, open_dir, exists_in
 from whoosh.fields import Schema, ID, TEXT, STORED
 from whoosh.qparser import QueryParser
 from whoosh.query import Term
+from whoosh.scoring import BM25F
 from whoosh import writing
 import edocuments
+
+
+PATH = 'path_id'
+CONTENT = 'content'
+DATE = 'date'
+DIRECTORY = 'directory'
+MD5 = 'md5'
 
 
 class Index:
@@ -14,13 +22,13 @@ class Index:
     def __init__(self):
         self.directory = os.path.join(edocuments.root_folder, '.index')
         self.dirty = False
-        schema = Schema(
-            path_id=ID(stored=True, unique=True),
-            content=TEXT(stored=True),
-            date=STORED,
-            directory=STORED,
-            md5=TEXT(stored=True),
-        )
+        schema = Schema(**{
+            PATH: ID(stored=True, unique=True),
+            CONTENT: TEXT(stored=True),
+            DATE: STORED,
+            DIRECTORY: STORED,
+            MD5: TEXT(stored=True),
+        })
         self.parser_path = QueryParser("path_id", schema)
         self.parser_content = QueryParser("content", schema)
 
@@ -63,12 +71,12 @@ class Index:
     def add(self, filename, text, date, md5):
         filename = edocuments.short_path(filename)
         with self.index.writer() as writer:
-            writer.update_document(
-                path_id=filename,
-                content=text,
-                date=date,
-                directory=False,
-            )
+            writer.update_document(**{
+                PATH: filename,
+                CONSTENT: text,
+                DATE: date,
+                DIRECTORY: False,
+            })
 
     def optimize(self):
         self.index.optimize()
@@ -78,17 +86,20 @@ class Index:
             writer.mergetype = writing.CLEAR
 
     def search(self, text):
-        with self.index.searcher() as searcher:
+        with self.index.searcher(weighting=BM25F(B=0, K1=1.2)) as searcher:
             query = self.parser_content.parse(text)
-            results = searcher.search(query, terms=True, limit=200)
+            results = searcher.search(
+                query, terms=True, limit=1000,
+            )
             return [{
-                'path': r.get('path_id'),
-                'content': r.get('content'),
-                'directory': r.get('directory'),
+                'path': r.get(PATH),
+                'content': r.get(CONTENT),
+                'directory': r.get(DIRECTORY),
                 'highlight': r.highlights(
-                    'path_id' if 'path_id' in r.matched_terms() else 'content'
+                    PATH if PATH in r.matched_terms() else CONTENT
                 ),
             } for r in results]
+
 
 _index = None
 

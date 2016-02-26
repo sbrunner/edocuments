@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from PyQt5.QtCore import QObject, pyqtSignal
 import edocuments
 from edocuments.process import Process
-from edocuments.index import index
+from edocuments.index import index, PATH, CONTENT, DATE, DIRECTORY, MD5
 
 
 class Backend(QObject):
@@ -64,12 +64,12 @@ class Backend(QObject):
         with index().index.reader() as reader:
             for num, doc in reader.iter_docs():
                 if \
-                        doc['path_id'] in docs_date or \
-                        not Path(edocuments.long_path(doc['path_id'])).exists():
-                    print("Delete document: " + doc['path_id'])
+                        doc[PATH] in docs_date or \
+                        not Path(edocuments.long_path(doc[PATH])).exists():
+                    print("Delete document: " + doc[PATH])
                     docs_to_rm.append(num)
                 else:
-                    docs_date[doc['path_id']] = (doc.get('date'), doc.get('md5'))
+                    docs_date[doc[PATH]] = (doc.get(DATE), doc.get(MD5))
 
         self.update_library_progress.emit(
             0, 'Adding the directories...', '')
@@ -86,12 +86,12 @@ class Backend(QObject):
                         break
                 if not ignore:
                     with index().index.writer() as writer:
-                        writer.update_document(
-                            path_id=str(directory),
-                            content=str(directory),
-                            date=directory.stat().st_mtime,
-                            directory=True,
-                        )
+                        writer.update_document(**{
+                            PATH: edocuments.short_path(directory),
+                            CONTENT: str(directory),
+                            DATE: directory.stat().st_mtime,
+                            DIRECTORY: True,
+                        })
 
         self.update_library_progress.emit(
             0, 'Browsing the files (0)...', '')
