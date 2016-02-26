@@ -50,7 +50,9 @@ class MainWindow(QMainWindow):
             self.selection_change)
 
         self.ui.library_update.triggered.connect(self.update_library)
-        self.ui.library_optimize.triggered.connect(self.backend.optimize_library)
+        self.ui.library_optimize.triggered.connect(
+            self.backend.optimize_library)
+        self.ui.library_reset.triggered.connect(self.reset_library)
         self.backend.process.progress.connect(self.on_progress)
 
     def open_selected(self):
@@ -75,6 +77,9 @@ class MainWindow(QMainWindow):
                 item.result.get('highlight'))
         else:
             self.ui.search_result_text.document().setHtml('')
+
+    def reset_library(self):
+        index().clear()
 
     def search(self, text):
         model = self.ui.search_result_list.model()
