@@ -79,13 +79,21 @@ class MainWindow(QMainWindow):
             self.ui.search_result_text.document().setHtml('')
 
     def reset_library(self):
-        index().clear()
+        msg = QMessageBox(self)
+        msg.setWindowTitle("Reset the library...")
+        msg.setInformativeText("Are you sure to reset all you index?")
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        if msg.exec() == QMessageBox.Ok:
+            index().clear()
 
     def search(self, text):
         model = self.ui.search_result_list.model()
         model.removeRows(0, model.rowCount())
         raw_results = index().search(self.ui.search_text.text())
-        dirs = dict([(r.get('path'), -1) for r in raw_results if r.get('directory')])
+        dirs = dict([
+            (r.get('path'), -1)
+            for r in raw_results if r.get('directory')
+        ])
         results = {}
         for index_, result in enumerate(raw_results):
             path_ = result.get('path')
@@ -103,7 +111,10 @@ class MainWindow(QMainWindow):
 
         for result, count in results:
             postfix = ' (%i)' % (count + 1) if result.get('directory') else ''
-            item = QListWidgetItem(result['path'] + postfix, self.ui.search_result_list)
+            item = QListWidgetItem(
+                result['path'] + postfix,
+                self.ui.search_result_list
+            )
             item.result = result
 
     def scan_browse(self, event):
