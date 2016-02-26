@@ -86,7 +86,7 @@ class Index:
                 'content': r.get('content'),
                 'directory': r.get('directory'),
                 'highlight': r.highlights(
-                    'path' if 'path_in' in r.matched_terms() else 'content'
+                    'path_id' if 'path_id' in r.matched_terms() else 'content'
                 ),
             } for r in results]
 
