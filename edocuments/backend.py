@@ -2,6 +2,7 @@
 
 import os
 import sys
+import hashlib
 import traceback
 from pathlib import Path
 from threading import Lock
@@ -68,7 +69,7 @@ class Backend(QObject):
                     print("Delete document: " + doc['path_id'])
                     docs_to_rm.append(num)
                 else:
-                    docs_date[doc['path_id']] = doc['date']
+                    docs_date[doc['path_id']] = (doc.get('date'), doc.get('md5'))
 
         self.update_library_progress.emit(
             0, 'Adding the directories...', '')
@@ -106,12 +107,26 @@ class Backend(QObject):
                         ignore = False
                         break
                 if not ignore and filename.exists() and str(filename).find(index_folder) != 0:
-                    current_date = docs_date.get(edocuments.short_path(filename))
+                    current_date, md5 = docs_date.get(edocuments.short_path(filename), (None, None))
                     new_date = filename.stat().st_mtime
-                    if current_date is None or current_date < new_date:
-                        todo.append((str(filename), cmds))
-                        self.update_library_progress.emit(
-                            0, 'Browsing the files (%i)...' % len(todo), str(filename))
+                    new_md5 = hashlib.md5()
+                    with open(str(filename), "rb") as f:
+                        for chunk in iter(lambda: f.read(4096), b""):
+                            new_md5.update(chunk)
+
+                    if current_date is None or new_date > current_date:
+                        if current_date is not None and (md5 is None or md5 == new_md5.hexdigest()):
+                            doc = index().get(filename)
+                            index().add(
+                                filename,
+                                doc['content'],
+                                max(new_date, current_date),
+                                new_md5.hexdigest()
+                            )
+                        else:
+                            todo.append((str(filename), cmds, new_date, new_md5.hexdigest()))
+                            self.update_library_progress.emit(
+                                0, 'Browsing the files (%i)...' % len(todo), str(filename))
 
         self.nb = len(todo)
         self.nb_error = 0
@@ -152,7 +167,7 @@ class Backend(QObject):
     def to_txt(self, job):
         filename, cmds = job
         try:
-            text, extension = Process().process(
+            text, extension, date, md5 = Process().process(
                 cmds, filename=str(filename), get_content=True,
             )
             if text is None:
@@ -171,7 +186,11 @@ class Backend(QObject):
                 print("Error with document: " + filename)
                 self.nb_error += 1
             else:
-                index().add(filename, text)
+                index().add(
+                    filename,
+                    "%s\n%s" % (filename, text),
+                    date, md5
+                )
 
             self.lock.release()
         except:

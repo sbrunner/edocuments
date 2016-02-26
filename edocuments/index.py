@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-from pathlib import Path
 from whoosh.index import create_in, open_dir, exists_in
 from whoosh.fields import Schema, ID, TEXT, STORED
 from whoosh.qparser import QueryParser
@@ -20,6 +19,7 @@ class Index:
             content=TEXT(stored=True),
             date=STORED,
             directory=STORED,
+            md5=TEXT(stored=True),
         )
         self.parser_path = QueryParser("path_id", schema)
         self.parser_content = QueryParser("content", schema)
@@ -35,35 +35,37 @@ class Index:
             if 'directory' not in self.index.schema.names():
                 with self.index.writer() as writer:
                     writer.add_field('directory', STORED)
+            if 'md5' not in self.index.schema.names():
+                with self.index.writer() as writer:
+                    writer.add_field('md5', TEXT(stored=True))
             print(
-                'Field length:\npath: %i\ncontent: %i\ndate: %i\n'
-                'directory: %i' % (
+                'Field length:\npath: %i\ncontent: %i\nmd5: %i' % (
                     self.index.field_length("path_id"),
                     self.index.field_length("content"),
-                    self.index.field_length("date"),
-                    self.index.field_length("directory"),
+                    self.index.field_length("md5"),
                 )
             )
 
-# http://whoosh.readthedocs.org/en/latest/schema.html#modifying-the-schema-after-indexing
-
-    def get_date(self, filename):
+    def get(self, filename):
         filename = edocuments.short_path(filename)
         with self.index.searcher() as searcher:
             results = searcher.search(Term("path_id", filename))
             if len(results) == 0:
                 return None
             assert(len(results) == 1)
-            assert(results[0].get('date') is not None)
-            return results[0].get('date')
 
-    def add(self, filename, text):
-        date = Path(filename).stat().st_mtime
+            result = {}
+            for field in self.index.schema.names():
+                result[filed] = results[0].get(filed)
+
+            return result
+
+    def add(self, filename, text, date, md5):
         filename = edocuments.short_path(filename)
         with self.index.writer() as writer:
             writer.update_document(
                 path_id=filename,
-                content="%s\n%s" % (filename, text),
+                content=text,
                 date=date,
                 directory=False,
             )
