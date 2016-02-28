@@ -112,12 +112,12 @@ cmds:
 
     odt2txt:
         display: Convert OpenDocument to text.
-        cmd: "odt2text {in} {out}"
+        cmd: "odt2txt {in} --output={out}"
         out_ext: txt
 
     ods2txt:
         display: Convert OpenDocument to text.
-        cmd: "ods2text {in} {out}"
+        cmd: "ods2txt {in} --output={out}"
         out_ext: txt
 
     docx2txt:
