@@ -50,7 +50,16 @@ class Backend(QObject):
                     text, extension = self.process.process(
                         cmds, filename=filename, get_content=True,
                     )
-                    index().add(filename, text)
+                    new_md5 = hashlib.md5()
+                    new_date = Path(filename).stat().st_mtime
+                    with open(str(filename), "rb") as f:
+                        for chunk in iter(lambda: f.read(4096), b""):
+                            new_md5.update(chunk)
+                    index().add(
+                        filename, text,
+                        new_date,
+                        new_md5.hexdigest()
+                    )
                 except:
                     traceback.print_exc()
                     self.scan_error.emit(str(sys.exc_info()[1]))
