@@ -128,7 +128,7 @@ class MainWindow(QMainWindow):
 
     def update_library(self):
         self.update_library_progress = QProgressDialog(
-            "Scanning...", None, 0, 100, self)
+            "Update Library...", None, 0, 100, self)
         self.update_library_progress.setWindowTitle('Updating the library...')
         self.update_library_progress.setLabelText('Browsing the files...')
         self.update_library_progress.setWindowModality(Qt.WindowModal)

@@ -35,7 +35,7 @@ class Backend(QObject):
         self.scan_end.emit(filename)
 
         try:
-            filename, extension = self.process.process(
+            filename, extension = Process().process(
                 postprocess, filename=filename,
                 in_extention=extension,
             )
@@ -47,7 +47,7 @@ class Backend(QObject):
                 conv = conv[0]
                 cmds = conv.get("cmds")
                 try:
-                    text, extension = self.process.process(
+                    text, extension = Process().process(
                         cmds, filename=filename, get_content=True,
                     )
                     new_md5 = hashlib.md5()
