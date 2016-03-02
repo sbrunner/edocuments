@@ -105,8 +105,9 @@ def cmd_main():
 
     if options.install:
         if input(
-            'Create desktop and icon files (edocuments.desktop and '
-            'edocuments.png in ~/.local/share/applications)?\n'
+            'Create desktop and icon files (`edocuments.desktop` and '
+            '`edocuments.svg` in `~/.local/share/applications` and '
+            'in `~/.local/share/icons`)?\n'
         ) in ['y', 'Y']:
             if not Path(os.path.expanduser(
                         '~/.local/share/applications')).exists():
@@ -118,10 +119,13 @@ def cmd_main():
                 os.path.expanduser(
                     '~/.local/share/applications/edocuments.desktop')
             )
+            if not Path(os.path.expanduser(
+                        '~/.local/share/icons')).exists():
+                os.makedirs(os.path.expanduser('~/.local/share/icons'))
             shutil.copyfile(
-                os.path.join(ressource_dir, 'edocuments.png'),
+                os.path.join(ressource_dir, 'edocuments.svg'),
                 os.path.expanduser(
-                    '~/.local/share/applications/edocuments.png')
+                    '~/.local/share/icons/edocuments.svg')
             )
         if input(
             'Create the basic configuration '
