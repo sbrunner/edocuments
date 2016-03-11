@@ -160,7 +160,7 @@ def cmd_main():
                     ', '.join(packages)
                 ) in ['y', 'Y']:
                     subprocess.check_call([
-                        'sudo', 'apt-get', 'install',
+                        'sudo', 'apt-get', 'install', '--no-install-recommends',
                     ] + packages)
         else:
             print(
