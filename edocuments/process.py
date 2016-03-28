@@ -103,9 +103,10 @@ class Process(QObject):
     def _rename(self, cmd, destination_filename):
         from_re = cmd.get('from')
         to_re = cmd.get('to')
-        if cmd.get('format') in ['upper', 'lower']:
+        format_ = cmd.get('format')
+        if format_ in ['upper', 'lower']:
             def format_term(term):
-                if cmd.get('format') == 'upper':
+                if format_ == 'upper':
                     return term.upper()
                 else:
                     return term.lower()
@@ -114,24 +115,30 @@ class Process(QObject):
 
     def destination_filename(self, names, filename, extension=None):
         cmds = edocuments.config.get("cmds", {})
+        task = False
 
         for name in names:
             cmd = cmds.get(name)
-            if cmd is None:
+            if cmd is None:  # TODO manage inline cmd
                 raise Exception("Missing command '%s' in `cmds`" % name)
 
             if isinstance(cmd, str):
-                cmd = {}
+                cmd = {}  # TODO fix
 
             if cmd.get('type') == 'rename':
-                filename = self._rename(cmd, filename)
+                if "do" in cmd:
+                    for do in cmd["do"]:
+                        filename = self._rename(do, filename)
+                else:
+                    filename = self._rename(cmd, filename)
             else:
                 if 'out_ext' in cmd:
                     extension = cmd['out_ext']
+                task = True
 
         if extension is not None:
             filename = "%s.%s" % (re.sub(
                 r"\.[a-z0-9A-Z]{2,5}$", "",
                 filename
             ), extension)
-        return filename, extension
+        return filename, extension, task

@@ -131,7 +131,7 @@ Laetitia phone WhatsApp Media WhatsApp Video 20140531-WA0000.mp4
                         print(json.dumps(metadata, indent=4))
                         exit()
 
-                full_dest, extension = process.destination_filename(args.do, f)
+                full_dest, extension, task = process.destination_filename(args.do, f)
 
                 if f != full_dest:
                     print_diff(f, full_dest)
@@ -141,7 +141,7 @@ Laetitia phone WhatsApp Media WhatsApp Video 20140531-WA0000.mp4
                     elif len([i for i in job_files if i[1] == full_dest]) != 0:
                         sys.stderr.write(colorize("Destination will already exists", RED))
                         continue                    
-                else:
+                elif task is True:
                     print(colorize(f, BLUE))
                 job_files.append(f)
             except subprocess.CalledProcessError as e:
