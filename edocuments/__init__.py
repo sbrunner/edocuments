@@ -44,10 +44,17 @@ def long_path(filename):
     return filename
 
 
-def gui_main():
-    global config, root_folder, settings, main_window
-    with open(CONFIG_PATH) as f:
+def init(config_file=None):
+    global config
+    if config_file is None:
+        config_file = CONFIG_PATH
+    with open(config_file) as f:
         config = load(f.read())
+
+
+def gui_main():
+    init()
+    global config, root_folder, settings, main_window
     root_folder = os.path.expanduser(config.get("root_folder"))
     if root_folder[-1] != '/':
         root_folder += '/'

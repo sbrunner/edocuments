@@ -118,7 +118,7 @@ class Process(QObject):
         for name in names:
             cmd = cmds.get(name)
             if cmd is None:
-                raise "Missing command '%s' in `cmds`" % name
+                raise Exception("Missing command '%s' in `cmds`" % name)
 
             if isinstance(cmd, str):
                 cmd = {}

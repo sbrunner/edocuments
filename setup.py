@@ -57,6 +57,8 @@ setup(
         "console_scripts": [
             "edocuments-gui = edocuments:gui_main",
             "edocuments-cmd = edocuments:cmd_main",
+            "metarenamer = edocuments.utils.metarenamer:main",
+            "metarun = edocuments.utils.metarun:main",
         ],
     }
 )
