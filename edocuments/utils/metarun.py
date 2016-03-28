@@ -143,6 +143,8 @@ Laetitia phone WhatsApp Media WhatsApp Video 20140531-WA0000.mp4
                         continue                    
                 elif task is True:
                     print(colorize(f, BLUE))
+                else:
+                    continue
                 job_files.append(f)
             except subprocess.CalledProcessError as e:
                 sys.stderr.write("Error on getting metadata on '%s'.\n" % f)

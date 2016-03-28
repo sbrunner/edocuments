@@ -3,6 +3,7 @@
 
 import os
 import re
+import shutil
 from tempfile import NamedTemporaryFile
 from subprocess import check_call
 from shutil import copyfile
@@ -19,6 +20,23 @@ class Process(QObject):
             in_extention=None, get_content=False):
         cmds = edocuments.config.get("cmds", {})
         out_ext = in_extention
+
+        dst, extension, task = self.destination_filename(names, filename)
+        if task is False:
+            if filename != dst:
+                shutil.move(filename, dst)
+            return
+            
+        if cmds.get(names[0]).get("inplace") is True:
+            if in_extention is None:
+                out_name = NamedTemporaryFile(mode='w+b').name
+            else:
+                out_name = NamedTemporaryFile(
+                    mode='w+b',
+                    suffix='.' + in_extention
+                ).name
+            shutil.copyfile(filename, out_name)
+            filename = out_name
 
         original_filename = filename
         if destination_filename is None:
