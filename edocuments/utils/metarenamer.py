@@ -4,16 +4,14 @@ import sys
 import os
 import re
 import shutil
-import glob
 import json
 import datetime
-import shutil
 import subprocess
 import argparse
 import locale
-from edocuments.colorize import colorize, RED, GREEN, BLUE
+import errno
+from edocuments.colorize import colorize, GREEN, BLUE
 from edocuments.utils.common import print_diff, files, confirm, read_metadata
-
 
 
 def format_num_on_demon(fract):
@@ -34,6 +32,7 @@ def format_num_on_demon(fract):
     else:
         return fract
 
+
 def format(metadata, text, jinja):
     try:
         if metadata is None:
@@ -45,7 +44,7 @@ def format(metadata, text, jinja):
         else:
             return text.format(**metadata)
     except:
-        #print('Enable to format {}.'.format(text))
+        print('Enable to format {}.'.format(text))
         return text
 
 
@@ -54,7 +53,7 @@ def mkdir_p(path):
         return
     try:
         os.makedirs(path)
-    except FileExistsError as e:
+    except FileExistsError:
         pass
     except OSError as exc:
         if exc.errno == errno.EEXIST and os.path.isdir(path):
@@ -64,7 +63,7 @@ def mkdir_p(path):
 
 
 def replace(rflags, rfrom, rto, dst, metadata, jinja):
-    flags = 0;
+    flags = 0
     flags |= re.I if 'i' in rflags else 0
     flags |= re.L if 'l' in rflags else 0
     flags |= re.M if 'm' in rflags else 0
@@ -90,21 +89,21 @@ def replace(rflags, rfrom, rto, dst, metadata, jinja):
 
 def main():
     locale.setlocale(locale.LC_ALL, locale.getdefaultlocale())
-    
+
     parser = argparse.ArgumentParser(
         description='Rename the file using metadata.',
         usage='''
 Jpeg:
 rename:
-metarenamer --metadata --rename "{DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - {FileName}" --replace "i/img_/" "i/dscn/" "/_HDR/ hdr" "i/{DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - {DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - /{DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - " "i/{DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - {DateTimeOriginal:%%Y%%m%%d}_/{DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - " --ignore-dir @eaDir 
+metarenamer --metadata --rename "{DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - {FileName}" --replace "i/img_/" "i/dscn/" "/_HDR/ hdr" "i/{DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - {DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - /{DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - " "i/{DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - {DateTimeOriginal:%%Y%%m%%d}_/{DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - " --ignore-dir @eaDir
 move:
 metarenamer --metadata --move-to "{DateTimeOriginal:%%Y}/{DateTimeOriginal:%%m %%B}" --rename "{DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - {FileName}" --replace "i/ - IMG_[0-9]{4}\.jpg/.jpeg" --ignore-dir @eaDir
 rm dupplicate:
 metarenamer --metadata --replace "i/{DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - {DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - /{DateTimeOriginal:%%Y-%%m-%%d %%H:%%M:%%S} - " --ignore-dir @eaDir
-Jpeg errors: 
-metarenamer --dry-run --replace "/20[01][0-9].*20[01][0-9]/" --ignore-dir @eaDir 
+Jpeg errors:
+metarenamer --dry-run --replace "/20[01][0-9].*20[01][0-9]/" --ignore-dir @eaDir
 Video Mov:
-metarenamer --metadata --move-to "{MediaCreateDate:%%Y}/{MediaCreateDate:%%m %%B}" --rename "{MediaCreateDate:%%Y-%%m-%%d %%H:%%M:%%S} - {FileName}" --ignore-dir @eaDir 
+metarenamer --metadata --move-to "{MediaCreateDate:%%Y}/{MediaCreateDate:%%m %%B}" --rename "{MediaCreateDate:%%Y-%%m-%%d %%H:%%M:%%S} - {FileName}" --ignore-dir @eaDir
 
 MediaCreateDate
 MP3:
@@ -189,8 +188,8 @@ See also: https://docs.python.org/2/library/re.html#module-contents'''
     false = [r for r in args.replace if len(r) != 3]
     if len(false) > 0:
         print("Error in --replace:\n%s" % "\n".join(["/".join(r) for r in false]))
-        exit(1);
-    
+        exit(1)
+
     rename_list = []
 
     for f, f_ in files(args.directory, args.ignore_dir):
@@ -198,7 +197,7 @@ See also: https://docs.python.org/2/library/re.html#module-contents'''
             try:
                 metadata = None
                 if args.metadata or args.view:
-                    metadata = read_metadata(j, args.view)
+                    metadata = read_metadata(f, args.view)
                     if args.view:
                         print(json.dumps(metadata, indent=4))
                         exit()
@@ -234,14 +233,14 @@ See also: https://docs.python.org/2/library/re.html#module-contents'''
 
                         for rflags, rfrom, rto in args.replace:
                             dst = replace(rflags, rfrom, rto, dst, metadata, args.jinja)
-                            
+
                         if args.move_to is not None:
                             to_dir = format(metadata, args.move_to[0], args.jinja)
                         elif args.relative_move is not None:
-                            to_dir = re.sub("^\./", "",format(metadata, os.path.join(path, args.relative_move[0]), args.jinja))
+                            to_dir = re.sub("^\./", "", format(metadata, os.path.join(f, args.relative_move[0]), args.jinja))
                         else:
-                            to_dir = "" if path == "." else re.sub("^\./", "", path)
-                            
+                            to_dir = "" if f == "." else re.sub("^\./", "", f)
+
                         full_dest = os.path.join(to_dir, dst)
 
                         if f != full_dest:
@@ -260,7 +259,7 @@ See also: https://docs.python.org/2/library/re.html#module-contents'''
 #    except Exception as e:
 #        sys.stderr.write("%s\n" % str(e))
 #        raise e
-            
+
     if len(rename_list) != 0 and not args.dry_run and (args.apply or confirm()):
         for to_dir, src, dst, meta_value in rename_list:
             if to_dir is not None:
