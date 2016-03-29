@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from setuptools import setup, find_packages
 
-here = os.path.abspath(os.path.dirname(__file__))
 README = """A sample and productive personal documents library
 
 Scan your documents:
@@ -25,6 +22,7 @@ install_requires = [
     'bottle',
     'Mako',
     'Whoosh',
+    'metatask'
 ]
 
 setup_requires = [
