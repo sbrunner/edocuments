@@ -1,4 +1,3 @@
 * text whitespace=trailing-space,tab-in-indent,cr-at-eol,tabwidth=4 eol=lf
 .gitmodules text whitespace=indent-with-non-tab,tabwidth=2
-*.mk text whitespace=indent-with-non-tab,tabwidth=2
-*.png binary
+Makefile text whitespace=indent-with-non-tab,tabwidth=2

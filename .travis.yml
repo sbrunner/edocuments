@@ -9,3 +9,4 @@ script:
 - pip install flake8 pep8-naming
 - flake8 --version
 - flake8 --exclude=edocuments/ui --max-line-length=110
+- git diff --check `git rev-list --max-parents=0 HEAD`

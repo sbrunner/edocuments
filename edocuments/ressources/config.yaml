@@ -96,7 +96,7 @@ cmds:
         cmd: "convert {in} -format png {out}"
         out_ext: png
 
-    auto-rotate: 
+    auto-rotate:
         display: Automatic rotate.
         cmd: "convert {in} -rotate `(tesseract -psm 0 -l ${lang} {in} text 2>&1 || echo 'Orientation in degrees 0') | grep 'Orientation in degrees' | awk '{{print $4}}'` {out}"
 
