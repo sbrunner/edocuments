@@ -152,12 +152,17 @@ class MainWindow(QMainWindow):
             err.showMessage("The destination is a directory!")
             return
 
-        destination, extension, _, _ = self.backend.process.destination_filename(
+        destination1, extension, _, _ = self.backend.process.destination_filename(
             self.ui.scan_type.currentData().get("cmds"),
             self.filename()
         )
 
-        if pathlib.Path(destination).is_file():
+        destination2, extension, _, _ = self.backend.process.destination_filename(
+            self.ui.scan_type.currentData().get("postprocess", {}),
+            destination1
+        )
+
+        if pathlib.Path(destination1).is_file() or pathlib.Path(destination2).is_file() :
             msg = QMessageBox(self)
             msg.setWindowTitle("Scanning...")
             msg.setText("The destination file already exists")
