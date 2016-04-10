@@ -152,7 +152,7 @@ class MainWindow(QMainWindow):
             err.showMessage("The destination is a directory!")
             return
 
-        destination, extension, _ = self.backend.process.destination_filename(
+        destination, extension, _, _ = self.backend.process.destination_filename(
             self.ui.scan_type.currentData().get("cmds"),
             self.filename()
         )

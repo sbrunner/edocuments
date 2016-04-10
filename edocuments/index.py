@@ -64,7 +64,7 @@ class Index:
 
             result = {}
             for field in self.index.schema.names():
-                result[filed] = results[0].get(filed)
+                result[field] = results[0].get(field)
 
             return result
 

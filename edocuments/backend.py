@@ -8,7 +8,7 @@ from threading import Lock
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from PyQt5.QtCore import QObject, pyqtSignal
 import edocuments
-from edocuments.process import Process
+from metatask.process import Process
 from edocuments.index import index, PATH, CONTENT, DATE, DIRECTORY, MD5
 
 
@@ -36,7 +36,7 @@ class Backend(QObject):
 
         try:
             filename, extension = Process().process(
-                postprocess, filename=filename,
+                postprocess, filenames=filename,
                 in_extention=extension,
             )
             conv = [

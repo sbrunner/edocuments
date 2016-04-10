@@ -5,6 +5,7 @@ import sys
 import re
 import shutil
 import subprocess
+import metatask
 from pathlib import Path
 from yaml import load
 from argparse import ArgumentParser
@@ -50,6 +51,7 @@ def init(config_file=None):
         config_file = CONFIG_PATH
     with open(config_file) as f:
         config = load(f.read())
+    metatask.init(config_file)
 
 
 def gui_main():
