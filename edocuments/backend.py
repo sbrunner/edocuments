@@ -47,8 +47,8 @@ class Backend(QObject):
                 conv = conv[0]
                 cmds = conv.get("cmds")
                 try:
-                    text, extension = Process().process(
-                        cmds, filename=filename, get_content=True,
+                    text, extension, _, _ = Process().process(
+                        cmds, filenames=filename, get_content=True,
                     )
                     new_md5 = hashlib.md5()
                     new_date = Path(filename).stat().st_mtime
