@@ -47,7 +47,7 @@ class Backend(QObject):
                 conv = conv[0]
                 cmds = conv.get("cmds")
                 try:
-                    text, extension, _, _ = Process().process(
+                    text, extension = Process().process(
                         cmds, filenames=filename, get_content=True,
                     )
                     new_md5 = hashlib.md5()
