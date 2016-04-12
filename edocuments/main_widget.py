@@ -171,6 +171,10 @@ class MainWindow(QMainWindow):
                 QMessageBox.Ok | QMessageBox.Cancel | QMessageBox.Open)
             ret = msg.exec()
             if ret == QMessageBox.Ok:
+                if pathlib.Path(destination1).is_file():
+                    os.unlink(destination1)
+                if pathlib.Path(destination2).is_file():
+                    os.unlink(destination2)
                 self._scan()
             elif ret == QMessageBox.Open:
                 cmd = edocuments.config.get('open_cmd').split(' ')
