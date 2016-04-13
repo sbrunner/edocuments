@@ -162,7 +162,7 @@ class MainWindow(QMainWindow):
             destination1
         )
 
-        if pathlib.Path(destination1).is_file() or pathlib.Path(destination2).is_file() :
+        if pathlib.Path(destination1).is_file() or pathlib.Path(destination2).is_file():
             msg = QMessageBox(self)
             msg.setWindowTitle("Scanning...")
             msg.setText("The destination file already exists")
@@ -177,9 +177,14 @@ class MainWindow(QMainWindow):
                     os.unlink(destination2)
                 self._scan()
             elif ret == QMessageBox.Open:
-                cmd = edocuments.config.get('open_cmd').split(' ')
-                cmd.append(destination)
-                call(cmd)
+                if pathlib.Path(destination1).is_file():
+                    cmd = edocuments.config.get('open_cmd').split(' ')
+                    cmd.append(destination1)
+                    call(cmd)
+                if pathlib.Path(destination2).is_file():
+                    cmd = edocuments.config.get('open_cmd').split(' ')
+                    cmd.append(destination2)
+                    call(cmd)
         else:
             self._scan()
 
