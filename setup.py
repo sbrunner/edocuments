@@ -22,7 +22,8 @@ install_requires = [
     'bottle',
     'Mako',
     'Whoosh',
-    'metatask'
+    'metatask>=1.0.0',
+    'bashcolor>=1.0.0',
 ]
 
 setup_requires = [
