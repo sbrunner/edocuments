@@ -174,4 +174,5 @@ def cmd_main():
         else:
             print(
                 'WARNING: the package installation works only on Debian '
-                'base OS')
+                'base OS'
+            )
