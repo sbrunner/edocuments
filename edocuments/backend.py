@@ -184,7 +184,7 @@ class Backend(QObject):
         filename, cmds, date, md5 = job
         try:
             text, extension = Process().process(
-                cmds, filename=str(filename), get_content=True,
+                cmds, filenames=[str(filename)], get_content=True,
             )
             if text is None:
                 text = ''
