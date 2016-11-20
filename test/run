@@ -1,0 +1,32 @@
+#!/bin/bash
+
+function simple-run {
+    src=$1.png
+    int=$1.png
+    dst=$1-result.png
+    shift
+
+    run $src $int $dst $*
+}
+
+function run {
+    src=$1
+    int=$2
+    dst=$3
+    shift
+    shift
+    shift
+
+    metatask $src $*
+    mv $int $dst
+    git checkout $src
+}
+
+SCAN_OPTS="--cmds crop normalize cleanup-color normalize auto-rotate --apply"
+#SCANC_OPTS
+
+#simple-run scan-blank $SCAN_OPTS
+simple-run scan-blank1 $SCAN_OPTS
+
+#run scanc-blank --cmds crop normalize cleanup force-cleanup auto-rotate --apply
+#metatask --filename pre-scan-blank.tiff --cmds 
