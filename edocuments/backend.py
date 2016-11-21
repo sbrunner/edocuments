@@ -14,7 +14,6 @@ from edocuments.index import index, PATH, CONTENT, DATE, DIRECTORY, MD5
 
 class Backend(QObject):
     update_library_progress = pyqtSignal(int, str, str)
-    scan_end = pyqtSignal(str)
     scan_error = pyqtSignal(str)
     process = Process()
     lock = Lock()
@@ -32,7 +31,7 @@ class Backend(QObject):
         if filename is None:
             return
 
-        self.scan_end.emit(filename)
+        self.scan_end(filename)
 
         try:
             filename, extension = self.process.process(

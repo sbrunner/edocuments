@@ -38,9 +38,9 @@ class MainWindow(QMainWindow):
         self.ui.open.clicked.connect(self.open_selected)
         self.ui.open_folder.clicked.connect(self.open_folder)
 
-        self.image_dialog = Dialog()
+        self.image_dialog = Dialog(self.backend.process)
 
-        self.backend.scan_end.connect(self.end_scan)
+        self.backend.scan_end = self.end_scan
         self.backend.scan_error.connect(self.on_scan_error)
         self.backend.update_library_progress.connect(
             self.on_update_update_library_progress)
