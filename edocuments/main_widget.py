@@ -121,6 +121,8 @@ class MainWindow(QMainWindow):
         filename = QFileDialog.getSaveFileName(
             self, "Scan to", directory=self.filename()
         )[0]
+        if filename == '':
+            return
         filename = re.sub(r"\.[a-z0-9A-Z]{2,5}$", "", filename)
 
         filename = edocuments.short_path(filename)
