@@ -241,6 +241,7 @@ class MainWindow(QMainWindow):
 
     def on_scan_error(self, error):
         print('Error: %s' % error)
+        self.progress.hide()
         err = QErrorMessage(self)
         err.setWindowTitle("eDocuments - scan error")
         err.showMessage(error)
