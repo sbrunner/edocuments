@@ -198,6 +198,7 @@ class MainWindow(QMainWindow):
         self.progress.setWindowTitle("Scanning...")
         self.progress.setWindowModality(Qt.WindowModal)
         self.progress.setLabelText('Scanning...')
+        self.progress.canceled.connect(self.no_cancel)
         self.progress.show()
 
         t = Thread(
@@ -210,13 +211,19 @@ class MainWindow(QMainWindow):
         )
         t.start()
 
+    def no_cancel(self):
+        self.backend.process.cancel = True
+        self.progress.setLabelText('Canceling...')
+        self.progress.show()
+
     def on_progress(self, no, name, cmd_cmd, cmd):
         if self.progress is not None:
+            if self.progress.wasCanceled() is True:
+                self.progress.hide()
+                self.statusBar().showMessage("")
+                return
             self.progress.setValue(no)
             self.progress.setLabelText(cmd.get('display', ''))
-            if self.progress.wasCanceled() is True:
-                print("Cancel")
-                self.backend.process.cancel = True
         self.statusBar().showMessage(cmd_cmd)
 
     def end_scan(self, filename):
