@@ -139,23 +139,23 @@ class Backend(QObject):
                             print("Add document: " + edocuments.short_path(filename))
                             todo.append((str(filename), cmds, new_date, new_md5.hexdigest()))
                             self.update_library_progress.emit(
-                                0, 'Browsing the files (%i)...' % len(todo), edocuments.short_path(filename))
+                                0, 'Browsing the files ({0:d})...'.format(len(todo)), edocuments.short_path(filename))
 
         self.nb = len(todo)
         self.nb_error = 0
         self.no = 0
 
-        print('Removes %i old documents.' % len(docs_to_rm))
+        print('Removes {0:d} old documents.'.format(len(docs_to_rm)))
 
         with index().index.writer() as writer:
             for num in docs_to_rm:
                 writer.delete_document(num)
 
         self.update_library_progress.emit(
-            0, 'Parsing the files %i/%i.' % (self.no, self.nb), '',
+            0, 'Parsing the files {0:d}/{1:d}.'.format(self.no, self.nb), '',
         )
 
-        print('Process %i documents.' % len(todo))
+        print('Process {0:d} documents.'.format(len(todo)))
 
         with ThreadPoolExecutor(
             max_workers=edocuments.config.get('nb_process', 8)
@@ -173,7 +173,7 @@ class Backend(QObject):
         index().optimize()
 
         if self.nb_error != 0:
-            self.scan_error.emit("Finished with %i errors" % self.nb_error)
+            self.scan_error.emit("Finished with {0:d} errors".format(self.nb_error))
         else:
             self.update_library_progress.emit(
                 100, 'Finish', '',
@@ -192,10 +192,10 @@ class Backend(QObject):
 
             self.no += 1
             self.update_library_progress.emit(
-                self.no * 100 / self.nb, 'Parsing the files %i/%i.' % (self.no, self.nb),
+                self.no * 100 / self.nb, 'Parsing the files {0:d}/{1:d}.'.format(self.no, self.nb),
                 edocuments.short_path(filename),
             )
-            print("%i/%i" % (self.no, self.nb))
+            print("{0:d}/{1:d}".format(self.no, self.nb))
 
             if text is False:
                 print("Error with document: " + filename)
@@ -203,7 +203,7 @@ class Backend(QObject):
             else:
                 index().add(
                     filename,
-                    "%s\n%s" % (filename, text),
+                    "{0!s}\n{1!s}".format(filename, text),
                     date, md5
                 )
 
