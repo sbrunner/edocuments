@@ -139,7 +139,10 @@ class Backend(QObject):
                             print("Add document: " + edocuments.short_path(filename))
                             todo.append((str(filename), cmds, new_date, new_md5.hexdigest()))
                             self.update_library_progress.emit(
-                                0, 'Browsing the files ({0:d})...'.format(len(todo)), edocuments.short_path(filename))
+                                0,
+                                'Browsing the files ({0:d})...'.format(len(todo)),
+                                edocuments.short_path(filename),
+                            )
 
         self.nb = len(todo)
         self.nb_error = 0
