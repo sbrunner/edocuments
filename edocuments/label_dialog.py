@@ -45,7 +45,6 @@ class Dialog(QDialog):
                 button.clicked.connect(c.exec_)
                 self.ui.button_container.addWidget(button)
 
-
     def edit(self):
         subprocess.call([self.config.get("edit", "gimp"), self.image])
         self.set_image(self.image)

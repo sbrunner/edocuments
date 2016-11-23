@@ -47,10 +47,10 @@ class Index:
                 with self.index.writer() as writer:
                     writer.add_field('md5', TEXT(stored=True))
             print(
-                'Field length:\npath: %i\ncontent: %i\nmd5: %i' % (
+                'Field length:\npath: {0:d}\ncontent: {1:d}\nmd5: {2:d}'.format(
                     self.index.field_length("path_id"),
                     self.index.field_length("content"),
-                    self.index.field_length("md5"),
+                    self.index.field_length("md5")
                 )
             )
 

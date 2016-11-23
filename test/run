@@ -29,4 +29,4 @@ SCAN_OPTS="--cmds crop normalize cleanup-color normalize auto-rotate --apply"
 simple-run scan-blank1 $SCAN_OPTS
 
 #run scanc-blank --cmds crop normalize cleanup force-cleanup auto-rotate --apply
-#metatask --filename pre-scan-blank.tiff --cmds 
+#metatask --filename pre-scan-blank.tiff --cmds
