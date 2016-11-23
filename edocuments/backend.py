@@ -215,5 +215,6 @@ class Backend(QObject):
             traceback.print_exc()
             return filename, False
 
-    def optimize_library(self):
+    @staticmethod
+    def optimize_library():
         index().optimize()
