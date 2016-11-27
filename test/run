@@ -22,11 +22,14 @@ function run {
     git checkout $src
 }
 
-SCAN_OPTS="--cmds crop normalize cleanup-color normalize auto-rotate --apply"
+SCAN_OPTS="--cmds normalize cleanup force-cleanup crop auto-rotate --apply"
 #SCANC_OPTS
+PRESCAN_OPTS="--cmds crop-prescan --apply"
+PHOTO_OPTS="--cmds crop-0px normalize --apply"
 
-#simple-run scan-blank $SCAN_OPTS
+simple-run scan-blank $SCAN_OPTS
 simple-run scan-blank1 $SCAN_OPTS
-
-#run scanc-blank --cmds crop normalize cleanup force-cleanup auto-rotate --apply
-#metatask --filename pre-scan-blank.tiff --cmds
+simple-run document $SCAN_OPTS
+simple-run pre-scan-photo $PRESCAN_OPTS
+simple-run scanc-photo $PHOTO_OPTS
+#simple-run scanc-blank $SCANC_OPTS
