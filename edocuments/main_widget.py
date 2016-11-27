@@ -8,6 +8,7 @@ from subprocess import call
 from PyQt5.Qt import Qt
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, \
     QErrorMessage, QMessageBox, QProgressDialog, QListWidgetItem
+from PyQt5.QtCore import pyqtSignal
 import edocuments
 from edocuments.backend import Backend
 from edocuments.index import index
@@ -16,6 +17,8 @@ from edocuments.label_dialog import Dialog
 
 
 class MainWindow(QMainWindow):
+    scan_add = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
@@ -32,6 +35,7 @@ class MainWindow(QMainWindow):
             self.ui.scan_type.addItem(s.get("name"), s)
         self.ui.scan_type.setCurrentIndex(default_index)
 
+        self.scan_add.connect(self.scan_start)
         self.ui.scan_browse.clicked.connect(self.scan_browse)
         self.ui.scan_to.returnPressed.connect(self.scan_start)
         self.ui.scan_start.clicked.connect(self.scan_start)
@@ -198,6 +202,7 @@ class MainWindow(QMainWindow):
         self.progress.setWindowTitle("Scanning...")
         self.progress.setWindowModality(Qt.WindowModal)
         self.progress.setLabelText('Scanning...')
+        self.progress.setAutoClose(False)
         self.progress.canceled.connect(self.no_cancel)
         self.progress.show()
 
@@ -214,7 +219,6 @@ class MainWindow(QMainWindow):
     def no_cancel(self):
         self.backend.process.cancel = True
         self.progress.setLabelText('Canceling...')
-        self.progress.show()
 
     def on_progress(self, no, name, cmd_cmd, cmd):
         if self.progress is not None:
@@ -226,18 +230,26 @@ class MainWindow(QMainWindow):
             self.progress.setLabelText(cmd.get('display', ''))
         self.statusBar().showMessage(cmd_cmd)
 
-    def end_scan(self, filename):
+    def end_scan(self, filename, postprocess):
         self.progress.hide()
 
-        self.image_dialog.set_image(filename)
-        self.image_dialog.exec()
-
-        self.ui.scan_to.setText(re.sub(
-            ' ([0-9]{1,3})$',
-            lambda m: ' ' + str(int(m.group(1)) + 1),
-            self.ui.scan_to.text()
-        ))
+        self.image_dialog.set_image(filename, postprocess)
         self.statusBar().showMessage('')
+        ret = self.image_dialog.exec()
+        destination = None
+        extension = None
+        destinations = self.image_dialog.destinations
+        if ret == 0:  # finish
+            if len(self.image_dialog.destinations) >= 1:
+                destination, extension, _, _ = self.backend.process.destination_filename(
+                    postprocess,
+                    self.image_dialog.image
+                )
+                self.image_dialog._add()
+            self.image_dialog.destinations = []
+        else:
+            self.scan_add.emit()
+        return ret, self.image_dialog.image, destination, extension, destinations
 
     def on_scan_error(self, error):
         print('Error: %s' % error)

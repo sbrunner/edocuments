@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import os
 import sys
+import time
 import hashlib
 import traceback
+import threading
+import subprocess
+import bashcolor
 from pathlib import Path
 from threading import Lock
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -16,6 +21,7 @@ class Backend(QObject):
     update_library_progress = pyqtSignal(int, str, str)
     scan_error = pyqtSignal(str)
     process = Process()
+    postprocess_process = Process()
     lock = Lock()
 
     def do_scan(self, filename, cmds, postprocess):
@@ -31,13 +37,18 @@ class Backend(QObject):
         if filename is None:
             return
 
-        self.scan_end(filename)
+        ret, filename, destination, extension, destinations = self.scan_end(filename, postprocess)
+        filename, extension = self.postprocess_process.process(
+            postprocess, filenames=filename,
+            in_extention=extension,
+        )
+        if ret == 0 and len(destinations) > 1:  # => merge
+            Merger(destination, extension, destinations, self)
+        else:
+            self.tolib(filename, extension)
 
+    def tolib(self, filename, extension):
         try:
-            filename, extension = self.process.process(
-                postprocess, filenames=filename,
-                in_extention=extension,
-            )
             conv = [
                 c for c in edocuments.config.get('to_txt')
                 if c['extension'] == extension
@@ -46,7 +57,7 @@ class Backend(QObject):
                 conv = conv[0]
                 cmds = conv.get("cmds")
                 try:
-                    text, extension = self.process.process(
+                    text, extension = self.postprocess_process.process(
                         cmds, filenames=filename, get_content=True,
                     )
                     new_md5 = hashlib.md5()
@@ -185,7 +196,7 @@ class Backend(QObject):
     def to_txt(self, job):
         filename, cmds, date, md5 = job
         try:
-            text, extension = Process().process(
+            text, extension = self.postprocess_process.process(
                 cmds, filenames=[str(filename)], get_content=True,
             )
             if text is None:
@@ -218,3 +229,51 @@ class Backend(QObject):
     @staticmethod
     def optimize_library():
         index().optimize()
+
+class Cmd(QObject):
+    def __init__(self, dialog, cmd, process):
+        self.dialog = dialog
+        self.cmd = cmd
+        self.process = process
+        super(Cmd, self).__init__(dialog)
+
+    def exec_(self):
+        filename, extension = self.process.process(
+            [self.cmd], filenames=[self.dialog.image],
+        )
+        self.dialog.set_image(filename)
+
+class Merger:
+    def __init__(self, destination, extension, sources, backend):
+        self.destination = destination
+        self.extension = extension
+        self.sources = sources
+        self.backend = backend
+        t = threading.Thread(
+            target=self.do,
+        )
+        t.start()
+
+    def do(self):
+        while True:
+            ok = True
+            for src in self.sources:
+                ok = ok & os.path.exists(src)
+
+            if ok:
+                cmd = ["pdftk"] + self.sources + ["output", self.destination, "compress"]
+                print("{}: {}".format(
+                    bashcolor.colorize("merge", bashcolor.BLUE),
+                    " ".join(cmd)
+                ))
+                subprocess.check_call(cmd)
+                cmd = ["rm"] + self.sources
+                print("{}: {}".format(
+                    bashcolor.colorize("clean", bashcolor.BLUE),
+                    " ".join(cmd)
+                ))
+                subprocess.check_call(cmd)
+                self.backend.tolib(self.destination, self.extension)
+                return
+            else:
+                time.sleep(1)
