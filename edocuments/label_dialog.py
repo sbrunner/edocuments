@@ -62,9 +62,10 @@ class Dialog(QDialog):
         subprocess.call([self.config.get("edit", "gimp"), self.image])
         self.set_image(self.image)
 
-    def set_image(self, image_filename, postprocess):
+    def set_image(self, image_filename, postprocess=None):
         self.image = image_filename
-        self.postprocess = postprocess
+        if postprocess is not None:
+            self.postprocess = postprocess
         size = 800
         pixmap = QPixmap(image_filename)
         if pixmap.width() > pixmap.height():

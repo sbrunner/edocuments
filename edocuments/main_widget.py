@@ -243,7 +243,7 @@ class MainWindow(QMainWindow):
         self.progress.hide()
         self.progress.reset()
 
-        self.image_dialog.set_image(filename, postprocess)
+        self.image_dialog.set_image(filename)
         self.statusBar().showMessage('')
         ret = self.image_dialog.exec()
         destination = None
