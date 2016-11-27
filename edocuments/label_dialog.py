@@ -27,7 +27,9 @@ class Dialog(QDialog):
         cmds_config = edocuments.config.get("cmds", {})
         for cmd in self.config.get("commands", []):
             if isinstance(cmd, str):
-                cmd = cmds_config.get(cmd)
+                name = cmd
+                cmd = cmds_config.get(name)
+                cmd["name"] = name
 
             if cmd is not None:
                 button = QPushButton(self)
