@@ -59,6 +59,16 @@ class MainWindow(QMainWindow):
         self.ui.library_reset.triggered.connect(self.reset_library)
         self.backend.process.progress.connect(self.on_progress)
 
+        self.progress = QProgressDialog(
+            "Scanning...", "Cancel", 0, 1, self)
+        self.progress.setWindowTitle("Scanning...")
+        self.progress.setWindowModality(Qt.WindowModal)
+        self.progress.setLabelText('Scanning...')
+        self.progress.setAutoClose(False)
+        self.progress.setAutoReset(False)
+        self.progress.canceled.connect(self.no_cancel)
+        self.progress.reset()
+
     def open_selected(self):
         item = self.ui.search_result_list.currentItem()
         if item is not None:
@@ -197,13 +207,7 @@ class MainWindow(QMainWindow):
     def _scan(self):
         cmds = self.ui.scan_type.currentData().get("cmds")
 
-        self.progress = QProgressDialog(
-            "Scanning...", "Cancel", 0, len(cmds), self)
-        self.progress.setWindowTitle("Scanning...")
-        self.progress.setWindowModality(Qt.WindowModal)
-        self.progress.setLabelText('Scanning...')
-        self.progress.setAutoClose(False)
-        self.progress.canceled.connect(self.no_cancel)
+        self.progress.setMaximum(len(cmds))
         self.progress.show()
 
         t = Thread(
@@ -217,6 +221,7 @@ class MainWindow(QMainWindow):
         t.start()
 
     def no_cancel(self):
+        self.progress.show()
         self.backend.process.cancel = True
         self.progress.setLabelText('Canceling...')
 
@@ -232,6 +237,7 @@ class MainWindow(QMainWindow):
 
     def end_scan(self, filename, postprocess):
         self.progress.hide()
+        self.progress.reset()
 
         self.image_dialog.set_image(filename, postprocess)
         self.statusBar().showMessage('')
