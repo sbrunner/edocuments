@@ -160,6 +160,7 @@ class MainWindow(QMainWindow):
         return edocuments.long_path(self.ui.scan_to.text())
 
     def scan_start(self, event=None):
+        self.backend.process.cancel = False
         if pathlib.Path(self.filename()).is_dir():
             err = QErrorMessage(self)
             err.setWindowTitle("eDocuments - Error")
