@@ -137,8 +137,6 @@ class MainWindow(QMainWindow):
         )[0]
         if filename == '':
             return
-        filename = re.sub(r"\.[a-z0-9A-Z]{2,5}$", "", filename)
-
         filename = edocuments.short_path(filename)
         self.ui.scan_to.setText(filename)
 
@@ -172,6 +170,12 @@ class MainWindow(QMainWindow):
             self.ui.scan_type.currentData().get("cmds"),
             self.filename()
         )
+        src_name, src_ext = os.path.splitext(self.filename())
+        if "." + extension != src_ext:
+            destination1, extension, _, _ = self.backend.process.destination_filename(
+                self.ui.scan_type.currentData().get("cmds"),
+                self.filename() + "." + extension
+            )
 
         destination2, extension, _, _ = self.backend.process.destination_filename(
             self.ui.scan_type.currentData().get("postprocess", {}),
