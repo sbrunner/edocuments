@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import os
-import re
 import pathlib
 from threading import Thread
 from subprocess import call
 from PyQt5.Qt import Qt
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, \
     QErrorMessage, QMessageBox, QProgressDialog, QListWidgetItem
-from PyQt5.QtCore import pyqtSignal
 import edocuments
 from edocuments.backend import Backend
 from edocuments.index import index

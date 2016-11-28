@@ -2,11 +2,10 @@
 
 import os
 import subprocess
-from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QDialog, QPushButton
 from PyQt5.QtGui import QPixmap
 import edocuments
-from edocuments.backend import Cmd, Merger
+from edocuments.backend import Cmd
 from edocuments.ui.label_dialog import Ui_Dialog
 
 

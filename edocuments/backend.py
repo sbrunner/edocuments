@@ -233,6 +233,7 @@ class Backend(QObject):
     def optimize_library():
         index().optimize()
 
+
 class Cmd(QObject):
     image_changed = pyqtSignal(str)
 
@@ -247,7 +248,8 @@ class Cmd(QObject):
         filename, extension = self.process.process(
             [self.cmd], filenames=[self.dialog.image],
         )
-        image_changed.emit(filename)
+        self.image_changed.emit(filename)
+
 
 class Merger:
     def __init__(self, destination, extension, sources, backend):
