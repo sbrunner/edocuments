@@ -30,6 +30,7 @@ PHOTO_OPTS="--cmds crop-0px normalize --apply"
 simple-run scan-blank $SCAN_OPTS
 simple-run scan-blank1 $SCAN_OPTS
 simple-run document $SCAN_OPTS
+simple-run document2 $SCAN_OPTS
 simple-run pre-scan-photo $PRESCAN_OPTS
 simple-run scanc-photo $PHOTO_OPTS
 #simple-run scanc-blank $SCANC_OPTS
