@@ -19,6 +19,7 @@ from edocuments.index import index, PATH, CONTENT, DATE, DIRECTORY, MD5
 
 class Backend(QObject):
     update_library_progress = pyqtSignal(int, str, str)
+    scan_end = pyqtSignal(str, list)
     scan_error = pyqtSignal(str)
     process = Process()
     postprocess_process = Process()
@@ -37,7 +38,9 @@ class Backend(QObject):
         if filename is None:
             return
 
-        ret, filename, destination, extension, destinations = self.scan_end(filename, postprocess)
+        self.scan_end.emit(filename, postprocess)
+
+    def finalize_document(self, ret, filename, destination, extension, destinations, postprocess):
         filename, extension = self.postprocess_process.process(
             postprocess, filenames=filename,
             in_extention=extension,
@@ -231,17 +234,20 @@ class Backend(QObject):
         index().optimize()
 
 class Cmd(QObject):
+    image_changed = pyqtSignal(str)
+
     def __init__(self, dialog, cmd, process):
         self.dialog = dialog
         self.cmd = cmd
         self.process = process
         super(Cmd, self).__init__(dialog)
+        self.image_changed.connect(self.dialog.set_image)
 
     def exec_(self):
         filename, extension = self.process.process(
             [self.cmd], filenames=[self.dialog.image],
         )
-        self.dialog.set_image(filename)
+        image_changed.emit(filename)
 
 class Merger:
     def __init__(self, destination, extension, sources, backend):

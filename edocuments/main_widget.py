@@ -17,8 +17,6 @@ from edocuments.label_dialog import Dialog
 
 
 class MainWindow(QMainWindow):
-    scan_add = pyqtSignal()
-
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
@@ -35,7 +33,6 @@ class MainWindow(QMainWindow):
             self.ui.scan_type.addItem(s.get("name"), s)
         self.ui.scan_type.setCurrentIndex(default_index)
 
-        self.scan_add.connect(self.scan_start)
         self.ui.scan_browse.clicked.connect(self.scan_browse)
         self.ui.scan_to.returnPressed.connect(self.scan_start)
         self.ui.scan_start.clicked.connect(self.scan_start)
@@ -44,7 +41,7 @@ class MainWindow(QMainWindow):
 
         self.image_dialog = Dialog(self.backend.process)
 
-        self.backend.scan_end = self.end_scan
+        self.backend.scan_end.connect(self.end_scan)
         self.backend.scan_error.connect(self.on_scan_error)
         self.backend.update_library_progress.connect(
             self.on_update_update_library_progress)
@@ -244,7 +241,7 @@ class MainWindow(QMainWindow):
         self.progress.hide()
         self.progress.reset()
 
-        self.image_dialog.set_image(filename)
+        self.image_dialog.set_image(filename, postprocess)
         self.statusBar().showMessage('')
         ret = self.image_dialog.exec()
         destination = None
@@ -259,8 +256,19 @@ class MainWindow(QMainWindow):
                 self.image_dialog._add()
             self.image_dialog.destinations = []
         else:
-            self.scan_add.emit()
-        return ret, self.image_dialog.image, destination, extension, destinations
+            self.scan_start()
+
+        Thread(
+            target=self.backend.finalize_document,
+            args=[
+                ret,
+                self.image_dialog.image,
+                destination,
+                extension,
+                destinations,
+                postprocess
+            ],
+        ).start()
 
     def on_scan_error(self, error):
         print('Error: %s' % error)
