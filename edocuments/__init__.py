@@ -46,20 +46,20 @@ def long_path(filename):
 
 
 def init(config_file=None):
-    global config
+    global config, root_folder
     if config_file is None:
         config_file = CONFIG_PATH
     with open(config_file) as f:
         config = load(f.read())
     metatask.init(config_file)
+    root_folder = os.path.expanduser(config.get("root_folder"))
+    if root_folder[-1] != '/':
+        root_folder += '/'
 
 
 def gui_main():
     init()
     global config, root_folder, settings, main_window
-    root_folder = os.path.expanduser(config.get("root_folder"))
-    if root_folder[-1] != '/':
-        root_folder += '/'
     settings = QSettings("org", "edocuments")
 
     app = QApplication(sys.argv)
