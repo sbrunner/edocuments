@@ -4,7 +4,7 @@
 Version=1.0
 Name=eDocuments
 Comment=a simple and productive personal documents library
-Exec=/home/sbrunner/.py3/bin/edocuments-gui
+Exec=/home/sbrunner/.py/bin/edocuments-gui
 #Terminal=false
 #X-MultipleArgs=false
 Type=Application

@@ -39,7 +39,7 @@ apt-get install pyqt5-dev-tools
 ## Install in your home directory
 
 ```bash
-virtualenv --system-site-packages --python=python3 $HOME/.py3
-$HOME/.py3/bin/pip install edocuments
-$HOME/.py3/bin/edocument-cmd --install
+virtualenv --system-site-packages --python=python3 $HOME/.py
+$HOME/.py/bin/pip install edocuments
+$HOME/.py/bin/edocument-cmd --install
 ```
