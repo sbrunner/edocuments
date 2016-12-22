@@ -89,11 +89,11 @@ class Index:
         with self.index.searcher(weighting=BM25F(B=0, K1=1.2)) as searcher:
             query = self.parser_content.parse(text)
             results = searcher.search(
-                query, terms=True, limit=1000,
+                query, terms=True, limit=100,
             )
             return [{
                 'path': r.get(PATH),
-                'content': r.get(CONTENT),
+                'content': r.get(CONTENT)[:200],
                 'directory': r.get(DIRECTORY),
                 'highlight': r.highlights(
                     PATH if PATH in r.matched_terms() else CONTENT
