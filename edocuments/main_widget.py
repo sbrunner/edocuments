@@ -166,7 +166,7 @@ class MainWindow(QMainWindow):
             self.ui.scan_type.currentData().get("cmds"),
             self.filename()
         )
-        src_name, src_ext = os.path.splitext(self.filename())
+        _, src_ext = os.path.splitext(self.filename())
         if "." + extension != src_ext:
             destination1, extension, _, _ = self.backend.process.destination_filename(
                 self.ui.scan_type.currentData().get("cmds"),

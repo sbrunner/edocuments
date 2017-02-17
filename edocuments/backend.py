@@ -27,7 +27,7 @@ class Backend(QObject):
 
     def do_scan(self, filename, cmds, postprocess):
         try:
-            filename, extension = self.process.process(
+            filename, _ = self.process.process(
                 cmds, destination_filename=filename,
             )
         except:
@@ -181,7 +181,7 @@ class Backend(QObject):
                 executor.submit(self.to_txt, t):
                 t for t in todo
             }
-            for feature in as_completed(future_results):
+            for _ in as_completed(future_results):
                 pass
 
         self.update_library_progress.emit(
@@ -199,7 +199,7 @@ class Backend(QObject):
     def to_txt(self, job):
         filename, cmds, date, md5 = job
         try:
-            text, extension = self.postprocess_process.process(
+            text, _ = self.postprocess_process.process(
                 cmds, filenames=[str(filename)], get_content=True,
             )
             if text is None:

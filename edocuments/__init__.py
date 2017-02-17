@@ -3,11 +3,11 @@
 import os
 import sys
 import re
+import yaml
 import shutil
 import subprocess
 import metatask
 from pathlib import Path
-from yaml import load
 from argparse import ArgumentParser
 from bottle import mako_template
 from PyQt5.QtCore import QSettings
@@ -50,7 +50,7 @@ def init(config_file=None):
     if config_file is None:
         config_file = CONFIG_PATH
     with open(config_file) as f:
-        config = load(f.read())
+        config = yaml.safe_load(f.read())
     metatask.init(config_file)
     root_folder = os.path.expanduser(config.get("root_folder"))
     if root_folder[-1] != '/':
