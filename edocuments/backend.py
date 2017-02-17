@@ -245,7 +245,7 @@ class Cmd(QObject):
         self.image_changed.connect(self.dialog.set_image)
 
     def exec_(self):
-        filename, extension = self.process.process(
+        filename, _ = self.process.process(
             [self.cmd], filenames=[self.dialog.image],
         )
         self.image_changed.emit(filename)
