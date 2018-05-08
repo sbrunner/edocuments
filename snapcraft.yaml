@@ -1,0 +1,19 @@
+name: edocuments
+version: git
+summary: eDocuments
+description: |
+  eDocuments is a simple and productive personal documents library
+
+grade: devel
+confinement: devmode
+
+apps:
+  edocuments:
+    command: bin/edocuments
+
+parts:
+  edocuments:
+    plugin: python
+    python-version: python3
+    source: .
+
