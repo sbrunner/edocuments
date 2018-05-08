@@ -10,8 +10,6 @@ confinement: classic
 apps:
   edocuments:
     command: bin/edocuments-gui
-    plugs:
-      - home
 
 parts:
   edocuments:
