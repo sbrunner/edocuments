@@ -20,5 +20,6 @@ parts:
     build-packages:
       - python3-pyqt5
       - pyqt5-dev-tools
-    install: make build
+    prepare: |
+        make build
 
