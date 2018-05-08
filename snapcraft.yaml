@@ -9,11 +9,10 @@ confinement: devmode
 
 apps:
   edocuments:
-    command: bin/edocuments
+    command: bin/edocuments-gui
 
 parts:
   edocuments:
     plugin: python
-    python-version: python3
     source: .
 
