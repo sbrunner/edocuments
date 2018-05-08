@@ -5,13 +5,15 @@ description: |
   eDocuments is a simple and productive personal documents library
 
 grade: devel
-confinement: classic
+confinement: devmode
 
 apps:
   edocuments:
     command: bin/edocuments-gui
     plugs:
       - home
+      - x11
+      - wayland
 
 parts:
   edocuments:
