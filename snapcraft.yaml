@@ -15,4 +15,6 @@ parts:
   edocuments:
     plugin: python
     source: .
+    stage-packages:
+      - python3-pyqt5
 
