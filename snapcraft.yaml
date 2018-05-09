@@ -12,7 +12,7 @@ icon: edocuments/ressources/edocuments.svg
 apps:
   edocuments:
     command: bin/edocuments-gui
-    desktop: usr/share/applications/edocuments.desktop
+    desktop: edocuments/ressources/edocuments.desktop
     plugs:
       - home
       - desktop
@@ -31,9 +31,7 @@ parts:
     override-build: |
         make build
         snapcraftctl build
-        cp edocuments/ressources/edocuments.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
-        sed -i 's|yExec=.*|TryExec=/snap/bin/edocuments-gui|' $SNAPCRAFT_PART_INSTALL/usr/share/applications/edocuments.desktop
-        cp edocuments/ressources/edocuments.svg $SNAPCRAFT_PART_INSTALL/usr/share/icons/
+        sed -i 's|yExec=.*|TryExec=/snap/bin/edocuments-gui|' edocuments/ressources/edocuments.desktop
     filesets:
       exclusion:
         - '*.ui'
