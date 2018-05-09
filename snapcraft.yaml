@@ -4,7 +4,6 @@ summary: eDocuments
 description: |
   eDocuments is a simple and productive personal documents library
 
-
 grade: devel
 confinement: devmode
 
