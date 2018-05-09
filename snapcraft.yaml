@@ -7,11 +7,15 @@ description: |
 grade: devel
 confinement: devmode
 
+icon: project/src/edocuments/ressources/edocuments.svg
+
 apps:
   edocuments:
     command: bin/edocuments-gui
+    desktop: usr/share/applications/edocuments.desktop
     plugs:
       - home
+      - desktop
       - x11
       - wayland
 
@@ -26,4 +30,14 @@ parts:
       - pyqt5-dev-tools
     prepare: |
         make build
+    install: |
+        cp edocuments/ressources/edocuments.desktop $SNAPCRAFT_PART_INSTALL/usr/share/applications/
+        sed -i 's|yExec=.*|TryExec=/snap/bin/edocuments-gui|' $SNAPCRAFT_PART_INSTALL/usr/share/applications/edocuments.desktop
+        cp edocuments/ressources/edocuments.svg $SNAPCRAFT_PART_INSTALL/usr/share/icons/
+    filesets:
+      exclusion:
+        - *.ui
+        - *.ts
+    prime:
+      - "$exclusion"
 
