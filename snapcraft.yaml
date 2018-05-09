@@ -34,8 +34,8 @@ parts:
         sed -i 's|yExec=.*|TryExec=/snap/bin/edocuments-gui|' edocuments/ressources/edocuments.desktop
     filesets:
       exclusion:
-        - '*.ui'
-        - '*.ts'
+        - '-*.ui'
+        - '-*.ts'
     prime:
       - "$exclusion"
 
