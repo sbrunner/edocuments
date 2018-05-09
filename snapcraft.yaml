@@ -33,13 +33,13 @@ parts:
         snapcraftctl build
         sed -i 's|yExec=.*|TryExec=/snap/bin/edocuments-gui|' edocuments/ressources/edocuments.desktop
     filesets:
-      exclusion:
+      files:
+        - edocuments
+        - MANIFEST.in
+        - setup.cfg
+        - setup.py
         - '-*.ui'
         - '-*.ts'
-        - '-test/'
-        - '-.git*'
-        - '-.travis.yml'
-        - '-Makefile'
     prime:
-      - "$exclusion"
+      - '$files'
 
