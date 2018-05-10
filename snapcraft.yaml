@@ -32,14 +32,14 @@ parts:
         make build
         snapcraftctl build
         sed -i 's|yExec=.*|TryExec=/snap/bin/edocuments-gui|' edocuments/ressources/edocuments.desktop
-    filesets:
-      files:
-        - edocuments
-        - MANIFEST.in
-        - setup.cfg
-        - setup.py
-        - '-*.ui'
-        - '-*.ts'
-    prime:
-      - '$files'
+#    filesets:
+#      files:
+#        - edocuments
+#        - MANIFEST.in
+#        - setup.cfg
+#        - setup.py
+#        - '-*.ui'
+#        - '-*.ts'
+#    prime:
+#      - '$files'
 
