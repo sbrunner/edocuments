@@ -12,7 +12,7 @@ icon: edocuments/ressources/edocuments.svg
 apps:
   edocuments:
     command: bin/edocuments-gui
-    desktop: edocuments/ressources/edocuments.desktop
+    desktop: lib/python3.5/site-packages/edocuments/ressources/edocuments.desktop
     plugs:
       - home
       - desktop
