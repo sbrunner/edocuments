@@ -145,7 +145,7 @@ def cmd_main():
                 lang=options.lang3
             )
             with open(
-                os.path.expanduser('~/.config/edocuments.yaml'), 'w'
+                os.path.expanduser('~/.config/edocuments.yaml'), 'w', encoding='utf-8'
             ) as file_open:
                 file_open.write(config)
 
