@@ -49,7 +49,7 @@ def init(config_file=None):
     global config, root_folder
     if config_file is None:
         config_file = CONFIG_PATH
-    with open(config_file) as f:
+    with open(config_file, encoding='utf-8') as f:
         config = yaml.safe_load(f.read())
     metatask.init(config_file)
     root_folder = os.path.expanduser(config.get("root_folder"))
