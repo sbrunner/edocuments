@@ -30,7 +30,7 @@ class Backend(QObject):
             filename, _ = self.process.process(
                 cmds, destination_filename=filename,
             )
-        except:
+        except Exception:
             traceback.print_exc()
             self.scan_error.emit(str(sys.exc_info()[1]))
             raise
@@ -73,11 +73,11 @@ class Backend(QObject):
                         new_date,
                         new_md5.hexdigest()
                     )
-                except:
+                except Exception:
                     traceback.print_exc()
                     self.scan_error.emit(str(sys.exc_info()[1]))
                     raise
-        except:
+        except Exception:
             traceback.print_exc()
             self.scan_error.emit(str(sys.exc_info()[1]))
             raise
@@ -225,7 +225,7 @@ class Backend(QObject):
                 )
 
             self.lock.release()
-        except:
+        except Exception:
             traceback.print_exc()
             return filename, False
 
