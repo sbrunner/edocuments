@@ -5,7 +5,7 @@ description: |
   eDocuments is a simple and productive personal documents library
 
 grade: stable
-confinement: strict
+confinement: classic
 
 icon: edocuments/ressources/edocuments.svg
 
